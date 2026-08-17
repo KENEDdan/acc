@@ -95,3 +95,43 @@ class AiAssistantReplyTests(TestCase):
     def test_malformed_json_returns_400(self):
         response = Client().post('/ai-assistant/reply/', data='not json', content_type='application/json')
         self.assertEqual(response.status_code, 400)
+
+    def _ask(self, message):
+        response = Client().post(
+            '/ai-assistant/reply/', data=json.dumps({'message': message}), content_type='application/json',
+        )
+        return response.json()['reply']
+
+    def test_word_boundary_matching_avoids_false_positive_substrings(self):
+        # 'aff' must not match as a substring of unrelated words like 'affair'.
+        self.assertIn('Thanks for reaching out', self._ask('I need to fix my affair with my landlord'))
+        # 'give' must not match as a substring of 'given'.
+        self.assertIn('Thanks for reaching out', self._ask('given the circumstances, what should I do?'))
+
+    def test_greeting_and_thanks_are_recognized(self):
+        self.assertIn('Hello', self._ask('hello there'))
+        self.assertIn("You're very welcome", self._ask('thank you so much'))
+
+    def test_live_status_reflects_real_live_service_state(self):
+        from church.models import LiveService
+        self.assertIn('not live right now', self._ask('are you live?'))
+
+        LiveService.objects.create(platform='youtube', stream_url='https://youtube.com/x', title='Sunday Service', is_live=True)
+        self.assertIn('live right now on YouTube', self._ask('are you live?'))
+
+    def test_branches_answer_reflects_real_branch_data(self):
+        from church.models import Branch
+        Branch.objects.create(name='Juba Main', location='Juba Town')
+        reply = self._ask('where is your branch located?')
+        self.assertIn('Juba Main', reply)
+        self.assertIn('Juba Town', reply)
+
+    def test_gym_answer_reflects_real_school_count(self):
+        from gym.models import School
+        School.objects.create(name='Test School', location='Juba')
+        reply = self._ask('tell me about gym')
+        self.assertIn('1 school', reply)
+
+    def test_aff_keyword_does_not_match_substring_in_other_words(self):
+        # Regression: 'aff' is a real keyword, but must be word-boundary matched.
+        self.assertNotIn('Apostles', self._ask('affording rent is hard for me'))
