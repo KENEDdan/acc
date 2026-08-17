@@ -1,0 +1,38 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}{{ item.title }}{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}{{ item.title }}{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'church:library_item_edit' item.pk %}">Edit</a>
+{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+    <div class="form-section">
+        <div class="form-grid">
+            <div class="form-field"><label>Author</label><div>{{ item.author|default:"—" }}</div></div>
+            <div class="form-field"><label>Category</label><div>{{ item.category|default:"—" }}</div></div>
+            <div class="form-field"><label>Status</label><div>{% if item.is_active %}<span class="badge badge-active">Active</span>{% else %}<span class="badge badge-inactive">Inactive</span>{% endif %}</div></div>
+            <div class="form-field"><label>Uploaded</label><div>{{ item.uploaded_at|date:"M d, Y" }}</div></div>
+            {% if item.cover_image %}<div class="form-field full"><label>Cover</label><div><img src="{{ item.cover_image.url }}" alt="{{ item.title }}" style="max-width:180px; border-radius:8px;"></div></div>{% endif %}
+            <div class="form-field full"><label>Description</label><div>{{ item.description|default:"—"|linebreaks }}</div></div>
+            <div class="form-field full">
+                <label>File</label>
+                <div>
+                    {% if item.file %}
+                    <a class="btn-secondary" href="{{ item.file.url }}" target="_blank" rel="noopener">Read Online</a>
+                    <a class="btn-secondary" href="{{ item.file.url }}" download>Download</a>
+                    {% elif item.external_url %}
+                    <a class="btn-secondary" href="{{ item.external_url }}" target="_blank" rel="noopener">Read Online (external link)</a>
+                    {% else %}
+                    —
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-field"><label>Uploaded By</label><div>{% if item.uploaded_by %}{{ item.uploaded_by.get_full_name|default:item.uploaded_by.username }}{% else %}—{% endif %}</div></div>
+        </div>
+    </div>
+    <div class="form-actions">
+        <a class="btn-secondary" href="{% url 'church:media_dashboard' %}">Back to Media Dashboard</a>
+    </div>
+</div>
+{% endblock %}

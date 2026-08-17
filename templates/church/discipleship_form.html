@@ -1,10 +1,10 @@
 {% extends "dashboard/_shell.html" %}
-{% block title %}Enroll Disciple{% endblock %}
+{% block title %}{% if is_edit %}Edit Discipleship Record{% else %}Enroll Disciple{% endif %}{% endblock %}
 {% block dash_eyebrow %}Church (ACC){% endblock %}
-{% block dash_title %}Enroll a Disciple{% endblock %}
+{% block dash_title %}{% if is_edit %}Edit {{ enrollment.full_name }}{% else %}Enroll a Disciple{% endif %}{% endblock %}
 {% block dash_content %}
 <div class="form-page">
-<div class="form-top-note">Each discipleship phase runs approximately three months. The end date is calculated automatically from the start date.</div>
+{% if not is_edit %}<div class="form-top-note">Each discipleship phase runs approximately three months. The end date is calculated automatically from the start date.</div>{% endif %}
 <form method="post">
     {% csrf_token %}
 
@@ -55,8 +55,12 @@
     </div>
 
     <div class="form-actions">
-        <button type="submit" class="btn-primary">Enroll Disciple</button>
+        <button type="submit" class="btn-primary">{% if is_edit %}Save Changes{% else %}Enroll Disciple{% endif %}</button>
+        {% if is_edit %}
+        <a class="btn-secondary" href="{% url 'church:discipleship_detail' enrollment.pk %}">Cancel</a>
+        {% else %}
         <a class="btn-secondary" href="{% url 'church:discipleship_dashboard' %}">Cancel</a>
+        {% endif %}
     </div>
 </form>
 </div>

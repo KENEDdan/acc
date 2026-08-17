@@ -1,7 +1,7 @@
 {% extends "dashboard/_shell.html" %}
-{% block title %}Add Sermon/Teaching{% endblock %}
+{% block title %}{% if is_edit %}Edit Sermon/Teaching{% else %}Add Sermon/Teaching{% endif %}{% endblock %}
 {% block dash_eyebrow %}Church (ACC){% endblock %}
-{% block dash_title %}Add Sermon or Teaching{% endblock %}
+{% block dash_title %}{% if is_edit %}Edit "{{ item.title }}"{% else %}Add Sermon or Teaching{% endif %}{% endblock %}
 {% block dash_content %}
 <div class="form-page">
 <form method="post">
@@ -17,8 +17,12 @@
         </div>
     </div>
     <div class="form-actions">
-        <button type="submit" class="btn-primary">Publish</button>
+        <button type="submit" class="btn-primary">{% if is_edit %}Save Changes{% else %}Publish{% endif %}</button>
+        {% if is_edit %}
+        <a class="btn-secondary" href="{% url 'church:media_item_detail' item.pk %}">Cancel</a>
+        {% else %}
         <a class="btn-secondary" href="{% url 'church:media_dashboard' %}">Cancel</a>
+        {% endif %}
     </div>
 </form>
 </div>

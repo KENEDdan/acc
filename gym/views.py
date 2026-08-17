@@ -1,15 +1,19 @@
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Sum
+from django.db.models.functions import TruncDate, TruncWeek, TruncMonth, TruncYear
 from django.utils import timezone
+import csv
 
 from newsfeed.models import FeedItem, FeedItemManager
-from finance.utils import currency_breakdown
+from finance.utils import currency_breakdown, period_breakdown
 from audit.models import AuditLog
+from audit.services import log_action
 from .models import School, SchoolMember, SchoolVolunteer, SchoolDisciple, SchoolActivity, AboutUs, FinanceRecord
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
 from django.utils import timezone as tz
 from newsfeed.forms import FeedItemForm
 from .forms import SchoolForm, SchoolMemberForm, SchoolVolunteerForm, SchoolDiscipleForm, SchoolActivityForm, GymFinanceForm
@@ -253,11 +257,59 @@ def finance_create(request):
     if request.method == 'POST':
         form = GymFinanceForm(request.POST)
         if form.is_valid():
-            obj = form.save(commit=False)
-            obj.recorded_by = request.user
-            obj.save()
-            messages.success(request, f"{obj.get_type_display()} of {obj.amount} {obj.currency} recorded.")
-            return redirect('gym:finance_dashboard')
+            if request.POST.get('confirm') == '1':
+                obj = form.save(commit=False)
+                obj.recorded_by = request.user
+                obj.save()
+                messages.success(request, f"{obj.get_type_display()} of {obj.amount} {obj.currency} recorded.")
+                return redirect('gym:finance_dashboard')
+            return render(request, 'gym/finance_confirm.html', {'form': form})
     else:
         form = GymFinanceForm()
     return render(request, 'gym/finance_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_gym_finance_or_super, login_url='/dashboard/redirect/')
+def finance_record_detail(request, pk):
+    """Read-only — finance admins can see the full detail of any entry but cannot edit it."""
+    record = get_object_or_404(FinanceRecord, pk=pk)
+    return render(request, 'gym/finance_detail.html', {'record': record})
+
+
+@login_required
+@user_passes_test(_gym_finance_or_super, login_url='/dashboard/redirect/')
+def finance_reports(request):
+    qs = FinanceRecord.objects.all()
+    return render(request, 'gym/finance_reports.html', {
+        'report_sections': [
+            ('Daily', period_breakdown(qs, TruncDate, limit=30)),
+            ('Weekly', period_breakdown(qs, TruncWeek, limit=12)),
+            ('Monthly', period_breakdown(qs, TruncMonth, limit=12)),
+            ('Annual', period_breakdown(qs, TruncYear, limit=5)),
+        ],
+    })
+
+
+@login_required
+@user_passes_test(_gym_finance_or_super, login_url='/dashboard/redirect/')
+def finance_report_export(request):
+    qs = FinanceRecord.objects.all().order_by('-date')
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    if start:
+        qs = qs.filter(date__gte=start)
+    if end:
+        qs = qs.filter(date__lte=end)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="gym_finance_report.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Date', 'Type', 'Category', 'Amount', 'Currency', 'School', 'Description', 'Recorded By'])
+    for r in qs:
+        writer.writerow([
+            r.date, r.get_type_display(), r.income_category or r.expense_category or r.other_category_note,
+            r.amount, r.currency, r.school.name if r.school else '', r.description,
+            r.recorded_by.get_full_name() or r.recorded_by.username if r.recorded_by else '',
+        ])
+    return response

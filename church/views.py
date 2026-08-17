@@ -1,13 +1,14 @@
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Sum, Q, Avg, Max
-from django.db.models.functions import TruncWeek, TruncMonth, TruncYear
+from django.db.models.functions import TruncDate, TruncWeek, TruncMonth, TruncYear
 from django.utils import timezone
 from django.core.paginator import Paginator
+import csv
 import datetime
 
 from newsfeed.models import FeedItem, FeedItemManager
-from finance.utils import currency_breakdown
+from finance.utils import currency_breakdown, period_breakdown
 from audit.models import AuditLog
 from audit.services import log_action
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -200,6 +201,7 @@ class MediaDashboardView(RoleDashboardMixin, TemplateView):
         ctx['teaching_count'] = MediaItem.objects.filter(media_type=MediaItem.MediaType.TEACHING).count()
         ctx['live_service'] = LiveService.objects.filter(is_live=True).first()
         ctx['recent_media'] = MediaItem.objects.all()[:20]
+        ctx['recent_library'] = LibraryResource.objects.all()[:20]
         return ctx
 
 
@@ -329,19 +331,91 @@ def discipleship_create(request):
 
 
 @login_required
+@user_passes_test(_church_discipleship_or_super, login_url='/dashboard/redirect/')
+def discipleship_detail(request, pk):
+    enrollment = get_object_or_404(DiscipleshipEnrollment, pk=pk)
+    return render(request, 'church/discipleship_detail.html', {'enrollment': enrollment})
+
+
+@login_required
+@user_passes_test(_church_discipleship_or_super, login_url='/dashboard/redirect/')
+def discipleship_edit(request, pk):
+    enrollment = get_object_or_404(DiscipleshipEnrollment, pk=pk)
+    if request.method == 'POST':
+        form = DiscipleshipEnrollmentForm(request.POST, instance=enrollment)
+        if form.is_valid():
+            obj = form.save()
+            log_action(request.user, 'church', 'DiscipleshipEnrollment', obj, action='update')
+            messages.success(request, f"{obj.full_name}'s discipleship record has been updated.")
+            return redirect('church:discipleship_detail', pk=obj.pk)
+    else:
+        form = DiscipleshipEnrollmentForm(instance=enrollment)
+    return render(request, 'church/discipleship_form.html', {'form': form, 'enrollment': enrollment, 'is_edit': True})
+
+
+@login_required
 @user_passes_test(_church_finance_or_super, login_url='/dashboard/redirect/')
 def finance_create(request):
     if request.method == 'POST':
         form = ChurchFinanceForm(request.POST)
         if form.is_valid():
-            obj = form.save(commit=False)
-            obj.recorded_by = request.user
-            obj.save()
-            messages.success(request, f"{obj.get_type_display()} of {obj.amount} {obj.currency} recorded.")
-            return redirect('church:finance_dashboard')
+            if request.POST.get('confirm') == '1':
+                obj = form.save(commit=False)
+                obj.recorded_by = request.user
+                obj.save()
+                messages.success(request, f"{obj.get_type_display()} of {obj.amount} {obj.currency} recorded.")
+                return redirect('church:finance_dashboard')
+            return render(request, 'church/finance_confirm.html', {'form': form})
     else:
         form = ChurchFinanceForm()
     return render(request, 'church/finance_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_church_finance_or_super, login_url='/dashboard/redirect/')
+def finance_record_detail(request, pk):
+    """Read-only — finance admins can see the full detail of any entry but cannot edit it."""
+    record = get_object_or_404(FinanceRecord, pk=pk)
+    return render(request, 'church/finance_detail.html', {'record': record})
+
+
+@login_required
+@user_passes_test(_church_finance_or_super, login_url='/dashboard/redirect/')
+def finance_reports(request):
+    qs = FinanceRecord.objects.all()
+    return render(request, 'church/finance_reports.html', {
+        'report_sections': [
+            ('Daily', period_breakdown(qs, TruncDate, limit=30)),
+            ('Weekly', period_breakdown(qs, TruncWeek, limit=12)),
+            ('Monthly', period_breakdown(qs, TruncMonth, limit=12)),
+            ('Annual', period_breakdown(qs, TruncYear, limit=5)),
+        ],
+    })
+
+
+@login_required
+@user_passes_test(_church_finance_or_super, login_url='/dashboard/redirect/')
+def finance_report_export(request):
+    """Downloads a CSV of finance records, optionally filtered to a date range."""
+    qs = FinanceRecord.objects.all().order_by('-date')
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    if start:
+        qs = qs.filter(date__gte=start)
+    if end:
+        qs = qs.filter(date__lte=end)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="church_finance_report.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Date', 'Type', 'Category', 'Amount', 'Currency', 'Branch', 'Description', 'Recorded By'])
+    for r in qs:
+        writer.writerow([
+            r.date, r.get_type_display(), r.income_category or r.expense_category or r.other_category_note,
+            r.amount, r.currency, r.branch.name if r.branch else '', r.description,
+            r.recorded_by.get_full_name() or r.recorded_by.username if r.recorded_by else '',
+        ])
+    return response
 
 
     # ---------- Giving / Donations ----------
@@ -524,6 +598,29 @@ def feed_item_create(request):
 
 
 @login_required
+@user_passes_test(_church_info_or_super, login_url='/dashboard/redirect/')
+def feed_item_detail(request, pk):
+    item = get_object_or_404(FeedItem, pk=pk, scope=FeedItem.Scope.CHURCH)
+    return render(request, 'church/feed_item_detail.html', {'item': item})
+
+
+@login_required
+@user_passes_test(_church_info_or_super, login_url='/dashboard/redirect/')
+def feed_item_edit(request, pk):
+    item = get_object_or_404(FeedItem, pk=pk, scope=FeedItem.Scope.CHURCH)
+    if request.method == 'POST':
+        form = FeedItemForm(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            obj = form.save()
+            log_action(request.user, 'church', 'FeedItem', obj, action='update')
+            messages.success(request, f"'{obj.title}' updated.")
+            return redirect('church:feed_item_detail', pk=obj.pk)
+    else:
+        form = FeedItemForm(instance=item)
+    return render(request, 'church/feed_item_form.html', {'form': form, 'item': item, 'is_edit': True})
+
+
+@login_required
 @user_passes_test(_church_media_or_super, login_url='/dashboard/redirect/')
 def media_item_create(request):
     if request.method == 'POST':
@@ -537,6 +634,29 @@ def media_item_create(request):
     else:
         form = MediaItemForm()
     return render(request, 'church/media_item_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_church_media_or_super, login_url='/dashboard/redirect/')
+def media_item_detail(request, pk):
+    item = get_object_or_404(MediaItem, pk=pk)
+    return render(request, 'church/media_item_detail.html', {'item': item})
+
+
+@login_required
+@user_passes_test(_church_media_or_super, login_url='/dashboard/redirect/')
+def media_item_edit(request, pk):
+    item = get_object_or_404(MediaItem, pk=pk)
+    if request.method == 'POST':
+        form = MediaItemForm(request.POST, instance=item)
+        if form.is_valid():
+            obj = form.save()
+            log_action(request.user, 'church', 'MediaItem', obj, action='update')
+            messages.success(request, f"'{obj.title}' updated.")
+            return redirect('church:media_item_detail', pk=obj.pk)
+    else:
+        form = MediaItemForm(instance=item)
+    return render(request, 'church/media_item_form.html', {'form': form, 'item': item, 'is_edit': True})
 
 
 @login_required
@@ -594,6 +714,29 @@ def library_item_create(request):
     else:
         form = LibraryResourceForm()
     return render(request, 'church/library_item_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_church_media_or_super, login_url='/dashboard/redirect/')
+def library_item_detail(request, pk):
+    item = get_object_or_404(LibraryResource, pk=pk)
+    return render(request, 'church/library_item_detail.html', {'item': item})
+
+
+@login_required
+@user_passes_test(_church_media_or_super, login_url='/dashboard/redirect/')
+def library_item_edit(request, pk):
+    item = get_object_or_404(LibraryResource, pk=pk)
+    if request.method == 'POST':
+        form = LibraryResourceForm(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            obj = form.save()
+            log_action(request.user, 'church', 'LibraryResource', obj, action='update')
+            messages.success(request, f"'{obj.title}' updated.")
+            return redirect('church:library_item_detail', pk=obj.pk)
+    else:
+        form = LibraryResourceForm(instance=item)
+    return render(request, 'church/library_item_form.html', {'form': form, 'item': item, 'is_edit': True})
 
 def _superadmin_only(user):
     return user.is_authenticated and user.is_superadmin()
@@ -776,6 +919,18 @@ def attendance_reports(request):
     return render(request, 'church/attendance_reports.html', {
         'weekly': weekly, 'monthly': monthly, 'annual': annual, 'recent': recent,
     })
+
+
+@login_required
+@user_passes_test(_church_membership_or_super, login_url='/dashboard/redirect/')
+def attendance_delete(request, pk):
+    """Clears a mistaken headcount entry. Membership Admin and the superadmin only."""
+    record = get_object_or_404(AttendanceRecord, pk=pk)
+    if request.method == 'POST':
+        log_action(request.user, 'church', 'AttendanceRecord', record, action='delete')
+        record.delete()
+        messages.success(request, "Attendance record cleared.")
+    return redirect('church:attendance_reports')
 
     # ---------- Counseling Sessions ----------
 

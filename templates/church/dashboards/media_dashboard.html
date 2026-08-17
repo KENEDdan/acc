@@ -17,15 +17,47 @@
 <div class="live-banner"><span>&#128227; Currently LIVE on {{ live_service.get_platform_display }}: {{ live_service.title }}</span></div>
 {% endif %}
 <div class="dash-table-wrap">
-    <div class="dash-table-head"><h3>Recent Uploads</h3></div>
+    <div class="dash-table-head"><h3>Sermons &amp; Teachings Published</h3></div>
     <div class="dash-table-scroll">
     <table class="dash-table">
-        <thead><tr><th>Title</th><th>Type</th><th>Speaker</th></tr></thead>
+        <thead><tr><th>Title</th><th>Type</th><th>Speaker</th><th></th></tr></thead>
         <tbody>
         {% for m in recent_media %}
-            <tr><td>{{ m.title }}</td><td>{{ m.get_media_type_display }}</td><td>{{ m.speaker|default:"—" }}</td></tr>
+            <tr>
+                <td>{{ m.title }}</td>
+                <td>{{ m.get_media_type_display }}</td>
+                <td>{{ m.speaker|default:"—" }}</td>
+                <td>
+                    <a class="btn-secondary" href="{% url 'church:media_item_detail' m.pk %}">View</a>
+                    <a class="btn-secondary" href="{% url 'church:media_item_edit' m.pk %}">Edit</a>
+                </td>
+            </tr>
         {% empty %}
-            <tr><td colspan="3" class="dash-empty">Nothing uploaded yet.</td></tr>
+            <tr><td colspan="4" class="dash-empty">Nothing uploaded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Library Books Published</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Title</th><th>Author</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        {% for b in recent_library %}
+            <tr>
+                <td>{{ b.title }}</td>
+                <td>{{ b.author|default:"—" }}</td>
+                <td>{% if b.is_active %}<span class="badge badge-active">Active</span>{% else %}<span class="badge badge-inactive">Inactive</span>{% endif %}</td>
+                <td>
+                    <a class="btn-secondary" href="{% url 'church:library_item_detail' b.pk %}">View</a>
+                    <a class="btn-secondary" href="{% url 'church:library_item_edit' b.pk %}">Edit</a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="dash-empty">No books added yet.</td></tr>
         {% endfor %}
         </tbody>
     </table>

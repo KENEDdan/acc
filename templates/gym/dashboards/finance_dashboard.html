@@ -3,6 +3,7 @@
 {% block dash_eyebrow %}Global Youth Ministry{% endblock %}
 {% block dash_title %}Finance Dashboard{% endblock %}
 {% block dash_actions %}
+<a class="btn-secondary" href="{% url 'gym:finance_reports' %}">Reports</a>
 <a class="btn-primary" href="{% url 'gym:finance_create' %}">+ Record Entry</a>
 {% endblock %}
 {% block dash_content %}
@@ -20,7 +21,7 @@
     <div class="dash-table-head"><h3>Recent Records</h3></div>
     <div class="dash-table-scroll">
     <table class="dash-table">
-        <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>School</th></tr></thead>
+        <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>School</th><th></th></tr></thead>
         <tbody>
         {% for r in recent_records %}
             <tr>
@@ -29,9 +30,10 @@
                 <td>{{ r.income_category|default:r.expense_category }}</td>
                 <td>{{ r.amount }} {{ r.currency }}</td>
                 <td>{{ r.school|default:"-" }}</td>
+                <td><a class="btn-secondary" href="{% url 'gym:finance_detail' r.pk %}">View</a></td>
             </tr>
         {% empty %}
-            <tr><td colspan="5" class="dash-empty">No records yet.</td></tr>
+            <tr><td colspan="6" class="dash-empty">No records yet.</td></tr>
         {% endfor %}
         </tbody>
     </table>

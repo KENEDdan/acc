@@ -1,0 +1,27 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}{{ item.title }}{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}{{ item.title }}{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'church:feed_item_edit' item.pk %}">Edit</a>
+{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+    <div class="form-section">
+        <div class="form-grid">
+            <div class="form-field"><label>Type</label><div>{{ item.get_item_type_display }}</div></div>
+            <div class="form-field"><label>Status</label><div>{% if item.is_active %}<span class="badge badge-active">Active</span>{% else %}<span class="badge badge-inactive">Inactive</span>{% endif %}</div></div>
+            <div class="form-field"><label>Published</label><div>{{ item.published_at|date:"M d, Y g:i A" }}</div></div>
+            <div class="form-field"><label>Expires</label><div>{{ item.expires_at|date:"M d, Y g:i A" }}</div></div>
+            {% if item.event_date %}<div class="form-field"><label>Event Date</label><div>{{ item.event_date|date:"M d, Y g:i A" }}</div></div>{% endif %}
+            <div class="form-field full"><label>Summary</label><div>{{ item.summary }}</div></div>
+            <div class="form-field full"><label>Body</label><div>{{ item.body|linebreaks }}</div></div>
+            {% if item.image %}<div class="form-field full"><label>Image</label><div><img src="{{ item.image.url }}" alt="{{ item.title }}" style="max-width:320px; border-radius:8px;"></div></div>{% endif %}
+            <div class="form-field"><label>Created By</label><div>{% if item.created_by %}{{ item.created_by.get_full_name|default:item.created_by.username }}{% else %}—{% endif %}</div></div>
+        </div>
+    </div>
+    <div class="form-actions">
+        <a class="btn-secondary" href="{% url 'church:info_dashboard' %}">Back to Information Dashboard</a>
+    </div>
+</div>
+{% endblock %}

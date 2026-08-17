@@ -24,7 +24,12 @@ urlpatterns = [
     path('members/<int:pk>/edit/', views.member_edit, name='member_edit'),
     path('members/reset-password/', views.member_reset_password, name='member_reset_password'),
     path('discipleship/new/', views.discipleship_create, name='discipleship_create'),
+    path('discipleship/<int:pk>/', views.discipleship_detail, name='discipleship_detail'),
+    path('discipleship/<int:pk>/edit/', views.discipleship_edit, name='discipleship_edit'),
     path('finance/new/', views.finance_create, name='finance_create'),
+    path('finance/reports/', views.finance_reports, name='finance_reports'),
+    path('finance/reports/export/', views.finance_report_export, name='finance_report_export'),
+    path('finance/<int:pk>/', views.finance_record_detail, name='finance_detail'),
 
     path('give/', views.giving_create, name='giving_create'),
     path('give/history/', views.my_giving_history, name='my_giving_history'),
@@ -36,8 +41,14 @@ urlpatterns = [
     path('dashboard/finance/giving-records/<int:pk>/reject/', views.giving_record_reject, name='giving_record_reject'),
 
     path('feed/new/', views.feed_item_create, name='feed_item_create'),
+    path('feed/<int:pk>/', views.feed_item_detail, name='feed_item_detail'),
+    path('feed/<int:pk>/edit/', views.feed_item_edit, name='feed_item_edit'),
     path('media/new/', views.media_item_create, name='media_item_create'),
+    path('media/<int:pk>/', views.media_item_detail, name='media_item_detail'),
+    path('media/<int:pk>/edit/', views.media_item_edit, name='media_item_edit'),
     path('library/new/', views.library_item_create, name='library_item_create'),
+    path('library/<int:pk>/', views.library_item_detail, name='library_item_detail'),
+    path('library/<int:pk>/edit/', views.library_item_edit, name='library_item_edit'),
     path('live/start/', views.live_start, name='live_start'),
     path('live/end/', views.live_end, name='live_end'),
 
@@ -59,6 +70,7 @@ urlpatterns = [
 
     path('attendance/new/', views.attendance_create, name='attendance_create'),
     path('attendance/reports/', views.attendance_reports, name='attendance_reports'),
+    path('attendance/<int:pk>/delete/', views.attendance_delete, name='attendance_delete'),
 
     path('counseling/new/', views.counseling_request_create, name='counseling_request_create'),
     path('counseling/requests/', views.counseling_requests_list, name='counseling_requests_list'),

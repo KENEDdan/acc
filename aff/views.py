@@ -1,10 +1,13 @@
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Sum
+from django.db.models.functions import TruncDate, TruncWeek, TruncMonth, TruncYear
 from django.utils import timezone
+import csv
+from django.http import HttpResponse
 
 from newsfeed.models import FeedItem, FeedItemManager
-from finance.utils import currency_breakdown
+from finance.utils import currency_breakdown, period_breakdown
 from audit.models import AuditLog
 from audit.services import log_action
 from notifications.services import notify_user, notify_superadmins, notify_role
@@ -256,14 +259,62 @@ def finance_record_create(request):
     if request.method == 'POST':
         form = AffFinanceForm(request.POST)
         if form.is_valid():
-            obj = form.save(commit=False)
-            obj.recorded_by = request.user
-            obj.save()
-            messages.success(request, "Finance record saved.")
-            return redirect('aff:finance_dashboard')
+            if request.POST.get('confirm') == '1':
+                obj = form.save(commit=False)
+                obj.recorded_by = request.user
+                obj.save()
+                messages.success(request, "Finance record saved.")
+                return redirect('aff:finance_dashboard')
+            return render(request, 'aff/finance_confirm.html', {'form': form})
     else:
         form = AffFinanceForm()
     return render(request, 'aff/finance_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_aff_finance_or_super, login_url='/dashboard/redirect/')
+def finance_record_detail(request, pk):
+    """Read-only — finance admins can see the full detail of any entry but cannot edit it."""
+    record = get_object_or_404(FinanceRecord, pk=pk)
+    return render(request, 'aff/finance_detail.html', {'record': record})
+
+
+@login_required
+@user_passes_test(_aff_finance_or_super, login_url='/dashboard/redirect/')
+def finance_reports(request):
+    qs = FinanceRecord.objects.all()
+    return render(request, 'aff/finance_reports.html', {
+        'report_sections': [
+            ('Daily', period_breakdown(qs, TruncDate, limit=30)),
+            ('Weekly', period_breakdown(qs, TruncWeek, limit=12)),
+            ('Monthly', period_breakdown(qs, TruncMonth, limit=12)),
+            ('Annual', period_breakdown(qs, TruncYear, limit=5)),
+        ],
+    })
+
+
+@login_required
+@user_passes_test(_aff_finance_or_super, login_url='/dashboard/redirect/')
+def finance_report_export(request):
+    qs = FinanceRecord.objects.all().order_by('-date')
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    if start:
+        qs = qs.filter(date__gte=start)
+    if end:
+        qs = qs.filter(date__lte=end)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="aff_finance_report.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Date', 'Type', 'Category', 'Amount', 'Currency', 'Related Request', 'Description', 'Recorded By'])
+    for r in qs:
+        writer.writerow([
+            r.date, r.get_type_display(), r.income_category or r.other_category_note,
+            r.amount, r.currency, r.related_request.full_name if r.related_request else '', r.description,
+            r.recorded_by.get_full_name() or r.recorded_by.username if r.recorded_by else '',
+        ])
+    return response
 
 
 @login_required

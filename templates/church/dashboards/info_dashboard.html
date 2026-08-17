@@ -10,17 +10,21 @@
     <div class="dash-table-head"><h3>Church Feed Items</h3></div>
     <div class="dash-table-scroll">
     <table class="dash-table">
-        <thead><tr><th>Title</th><th>Type</th><th>Published</th><th>Status</th></tr></thead>
+        <thead><tr><th>Title</th><th>Type</th><th>Published</th><th>Status</th><th></th></tr></thead>
         <tbody>
         {% for item in recent_items %}
             <tr>
-                <td><a href="{{ item.get_absolute_url }}">{{ item.title }}</a></td>
+                <td>{{ item.title }}</td>
                 <td>{{ item.get_item_type_display }}</td>
                 <td>{{ item.published_at|date:"M d, Y" }}</td>
                 <td>{% if item.is_active %}<span class="badge badge-active">Active</span>{% else %}<span class="badge badge-inactive">Inactive</span>{% endif %}</td>
+                <td>
+                    <a class="btn-secondary" href="{% url 'church:feed_item_detail' item.pk %}">View</a>
+                    <a class="btn-secondary" href="{% url 'church:feed_item_edit' item.pk %}">Edit</a>
+                </td>
             </tr>
         {% empty %}
-            <tr><td colspan="4" class="dash-empty">No feed items yet.</td></tr>
+            <tr><td colspan="5" class="dash-empty">No feed items yet.</td></tr>
         {% endfor %}
         </tbody>
     </table>

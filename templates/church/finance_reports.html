@@ -1,0 +1,45 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Finance Reports{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Finance Reports{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'church:finance_create' %}">+ Record Entry</a>
+{% endblock %}
+{% block dash_content %}
+
+<div class="form-section">
+    <form method="get" action="{% url 'church:finance_report_export' %}">
+        <div class="form-grid">
+            <div class="form-field"><label>From</label><input type="date" name="start"></div>
+            <div class="form-field"><label>To</label><input type="date" name="end"></div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Generate Report (CSV)</button>
+        </div>
+    </form>
+</div>
+
+{% for title, rows in report_sections %}
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>{{ title }}</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Period</th><th>Currency</th><th>Income</th><th>Expense</th><th>Balance</th></tr></thead>
+        <tbody>
+        {% for row in rows %}
+            <tr>
+                <td>{{ row.period }}</td>
+                <td>{{ row.currency }}</td>
+                <td>{{ row.income }}</td>
+                <td>{{ row.expense }}</td>
+                <td>{{ row.balance }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="dash-empty">No records in this range yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

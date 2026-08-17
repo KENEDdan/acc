@@ -1,0 +1,28 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Confirm Finance Entry{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Confirm Before Saving{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+<div class="form-top-note">Please review this entry carefully — once confirmed it will be posted to the finance ledger and can't be edited afterwards. If anything is wrong, cancel and correct it below.</div>
+<div class="form-section">
+    <div class="form-grid">
+        <div class="form-field"><label>Type</label><div>{{ form.instance.get_type_display }}</div></div>
+        <div class="form-field"><label>Category</label><div>{{ form.instance.get_income_category_display|default:form.instance.get_expense_category_display|default:form.instance.other_category_note|default:"—" }}</div></div>
+        <div class="form-field"><label>Amount</label><div>{{ form.instance.amount }} {{ form.instance.currency }}</div></div>
+        <div class="form-field"><label>Date</label><div>{{ form.instance.date }}</div></div>
+        <div class="form-field"><label>Branch</label><div>{{ form.instance.branch|default:"—" }}</div></div>
+        <div class="form-field full"><label>Description</label><div>{{ form.instance.description|default:"—" }}</div></div>
+    </div>
+</div>
+<form method="post">
+    {% csrf_token %}
+    {% for field in form %}{{ field.as_hidden }}{% endfor %}
+    <input type="hidden" name="confirm" value="1">
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Confirm &amp; Save</button>
+        <a class="btn-secondary" href="{% url 'church:finance_create' %}">Cancel / Edit</a>
+    </div>
+</form>
+</div>
+{% endblock %}

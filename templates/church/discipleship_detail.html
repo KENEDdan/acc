@@ -1,0 +1,61 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}{{ enrollment.full_name }}{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}{{ enrollment.full_name }}{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'church:discipleship_edit' enrollment.pk %}">Edit</a>
+{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+    <div class="form-section">
+        <h3 class="form-section-title">A. Personal Information</h3>
+        <div class="form-grid">
+            <div class="form-field"><label>Full Name</label><div>{{ enrollment.full_name }}</div></div>
+            <div class="form-field"><label>Member</label><div>{{ enrollment.member|default:"Not linked to a member record" }}</div></div>
+            <div class="form-field"><label>Phone</label><div>{{ enrollment.contact_phone|default:"-" }}</div></div>
+            <div class="form-field"><label>Date of Birth</label><div>{{ enrollment.date_of_birth|default:"-" }}</div></div>
+            <div class="form-field"><label>Gender</label><div>{{ enrollment.get_gender_display|default:"-" }}</div></div>
+            <div class="form-field"><label>Marital Status</label><div>{{ enrollment.get_marital_status_display|default:"-" }}</div></div>
+            <div class="form-field"><label>Occupation</label><div>{{ enrollment.occupation|default:"-" }}</div></div>
+            <div class="form-field full"><label>Address</label><div>{{ enrollment.address|default:"-" }}</div></div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="form-section-title">B. Spiritual Information</h3>
+        <div class="form-grid">
+            <div class="form-field"><label>Received Salvation</label><div>{{ enrollment.received_salvation|yesno:"Yes,No" }}</div></div>
+            <div class="form-field"><label>When</label><div>{{ enrollment.salvation_when|default:"-" }}</div></div>
+            <div class="form-field"><label>Where</label><div>{{ enrollment.salvation_where|default:"-" }}</div></div>
+            <div class="form-field full"><label>What Salvation Means to Them</label><div>{{ enrollment.salvation_meaning|default:"-" }}</div></div>
+            <div class="form-field full"><label>Salvation Story</label><div>{{ enrollment.salvation_story|default:"-" }}</div></div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="form-section-title">C. Additional Information</h3>
+        <div class="form-grid">
+            <div class="form-field full"><label>How They Heard About the Church</label><div>{{ enrollment.how_heard_about_church|default:"-" }}</div></div>
+            <div class="form-field full"><label>Reason to Join</label><div>{{ enrollment.reason_to_join|default:"-" }}</div></div>
+            <div class="form-field full"><label>Talents / Gifts</label><div>{{ enrollment.talents_gifts|default:"-" }}</div></div>
+            <div class="form-field full"><label>Health Status</label><div>{{ enrollment.health_status|default:"-" }}</div></div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="form-section-title">D. Discipleship Details</h3>
+        <div class="form-grid">
+            <div class="form-field"><label>Phase</label><div>Phase {{ enrollment.phase_number }}</div></div>
+            <div class="form-field"><label>Status</label><div><span class="badge badge-{{ enrollment.status }}">{{ enrollment.get_status_display }}</span></div></div>
+            <div class="form-field"><label>Start &rarr; End</label><div>{{ enrollment.start_date }} &rarr; {{ enrollment.end_date|default:"-" }}</div></div>
+            <div class="form-field"><label>Facilitator</label><div>{{ enrollment.facilitator|default:"-" }}</div></div>
+            <div class="form-field full"><label>Notes</label><div>{{ enrollment.notes|default:"-" }}</div></div>
+            <div class="form-field"><label>Registered</label><div>{{ enrollment.registered_at|date:"M d, Y" }} by {% if enrollment.registered_by %}{{ enrollment.registered_by.get_full_name|default:enrollment.registered_by.username }}{% else %}-{% endif %}</div></div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a class="btn-secondary" href="{% url 'church:discipleship_dashboard' %}">Back to Discipleship</a>
+    </div>
+</div>
+{% endblock %}

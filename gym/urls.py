@@ -17,6 +17,9 @@ urlpatterns = [
     path('disciples/new/', views.school_disciple_create, name='school_disciple_create'),
     path('activities/new/', views.school_activity_create, name='school_activity_create'),
     path('finance/new/', views.finance_create, name='finance_create'),
+    path('finance/reports/', views.finance_reports, name='finance_reports'),
+    path('finance/reports/export/', views.finance_report_export, name='finance_report_export'),
+    path('finance/<int:pk>/', views.finance_record_detail, name='finance_detail'),
 
     path('dashboard/info/', views.InfoDashboardView.as_view(), name='info_dashboard'),
     path('dashboard/finance/', views.FinanceDashboardView.as_view(), name='finance_dashboard'),

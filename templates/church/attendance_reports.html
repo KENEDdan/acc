@@ -59,7 +59,7 @@
     <div class="dash-table-head"><h3>Recent Entries</h3></div>
     <div class="dash-table-scroll">
     <table class="dash-table">
-        <thead><tr><th>Date</th><th>Branch</th><th>Count</th><th>Notes</th><th>Recorded By</th></tr></thead>
+        <thead><tr><th>Date</th><th>Branch</th><th>Count</th><th>Notes</th><th>Recorded By</th><th></th></tr></thead>
         <tbody>
         {% for a in recent %}
             <tr>
@@ -67,10 +67,16 @@
                 <td>{{ a.branch.name|default:"All Branches" }}</td>
                 <td>{{ a.count }}</td>
                 <td>{{ a.notes|default:"—" }}</td>
-                <td>{{ a.recorded_by.get_full_name|default:a.recorded_by.username }}</td>
+                <td>{% if a.recorded_by %}{{ a.recorded_by.get_full_name|default:a.recorded_by.username }}{% else %}—{% endif %}</td>
+                <td>
+                    <form method="post" action="{% url 'church:attendance_delete' a.pk %}" onsubmit="return confirm('Clear this attendance record? This cannot be undone.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-secondary" style="padding:4px 10px; font-size:.78rem;">Clear</button>
+                    </form>
+                </td>
             </tr>
         {% empty %}
-            <tr><td colspan="5" class="dash-empty">No attendance recorded yet.</td></tr>
+            <tr><td colspan="6" class="dash-empty">No attendance recorded yet.</td></tr>
         {% endfor %}
         </tbody>
     </table>

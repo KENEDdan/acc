@@ -1,0 +1,24 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Finance Entry{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Finance Entry Detail{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+    <div class="form-section">
+        <div class="form-grid">
+            <div class="form-field"><label>Type</label><div>{% if record.type == 'income' %}<span class="badge badge-active">Income</span>{% else %}<span class="badge badge-declined">Expense</span>{% endif %}</div></div>
+            <div class="form-field"><label>Category</label><div>{{ record.get_income_category_display|default:record.get_expense_category_display|default:record.other_category_note|default:"—" }}</div></div>
+            <div class="form-field"><label>Amount</label><div>{{ record.amount }} {{ record.currency }}</div></div>
+            <div class="form-field"><label>Date</label><div>{{ record.date }}</div></div>
+            <div class="form-field"><label>Branch</label><div>{{ record.branch|default:"—" }}</div></div>
+            <div class="form-field"><label>Recorded By</label><div>{% if record.recorded_by %}{{ record.recorded_by.get_full_name|default:record.recorded_by.username }}{% else %}—{% endif %}</div></div>
+            <div class="form-field"><label>Recorded At</label><div>{{ record.recorded_at|date:"M d, Y g:i A" }}</div></div>
+            <div class="form-field full"><label>Description</label><div>{{ record.description|default:"—" }}</div></div>
+        </div>
+    </div>
+    <p style="color:var(--acc-muted); font-size:.82rem;">This entry was confirmed at the time it was recorded and can't be edited here. If it needs correcting, record an offsetting entry with a note explaining why.</p>
+    <div class="form-actions">
+        <a class="btn-secondary" href="{% url 'church:finance_dashboard' %}">Back to Finance</a>
+    </div>
+</div>
+{% endblock %}

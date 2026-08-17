@@ -14,7 +14,7 @@
     <div class="dash-table-head"><h3>Enrollments</h3></div>
     <div class="dash-table-scroll">
     <table class="dash-table">
-        <thead><tr><th>Name</th><th>Phase</th><th>Status</th><th>Start &rarr; End</th><th>Facilitator</th></tr></thead>
+        <thead><tr><th>Name</th><th>Phase</th><th>Status</th><th>Start &rarr; End</th><th>Facilitator</th><th></th></tr></thead>
         <tbody>
         {% for e in enrollments %}
             <tr>
@@ -23,9 +23,10 @@
                 <td><span class="badge badge-{{ e.status }}">{{ e.get_status_display }}</span></td>
                 <td>{{ e.start_date }} &rarr; {{ e.end_date }}</td>
                 <td>{{ e.facilitator|default:"—" }}</td>
+                <td><a class="btn-secondary" href="{% url 'church:discipleship_detail' e.pk %}">View</a></td>
             </tr>
         {% empty %}
-            <tr><td colspan="5" class="dash-empty">No discipleship enrollments yet.</td></tr>
+            <tr><td colspan="6" class="dash-empty">No discipleship enrollments yet.</td></tr>
         {% endfor %}
         </tbody>
     </table>

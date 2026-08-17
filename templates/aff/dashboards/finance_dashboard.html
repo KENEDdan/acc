@@ -3,6 +3,7 @@
 {% block dash_eyebrow %}Apostles' Feet Foundation{% endblock %}
 {% block dash_title %}Finance &amp; Requests Dashboard{% endblock %}
 {% block dash_actions %}
+<a class="btn-secondary" href="{% url 'aff:finance_reports' %}">Reports</a>
 <a class="btn-secondary" href="{% url 'aff:reconciliation_create' %}">+ Reconcile Cash</a>
 <a class="btn-secondary" href="{% url 'aff:finance_create' %}">+ Record Entry</a>
 <a class="btn-primary" href="{% url 'aff:request_create' %}">+ Fill Request</a>

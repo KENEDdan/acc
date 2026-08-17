@@ -15,6 +15,9 @@ urlpatterns = [
     path('requests/<int:pk>/resubmit/', views.request_resubmit, name='request_resubmit'),
     path('requests/<int:pk>/disburse/', views.request_disburse, name='request_disburse'),
     path('finance/new/', views.finance_record_create, name='finance_create'),
+    path('finance/reports/', views.finance_reports, name='finance_reports'),
+    path('finance/reports/export/', views.finance_report_export, name='finance_report_export'),
+    path('finance/<int:pk>/', views.finance_record_detail, name='finance_detail'),
     path('reconciliation/new/', views.reconciliation_create, name='reconciliation_create'),
     path('feed/new/', views.feed_item_create, name='feed_item_create'),
 
