@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Thank You{% endblock %}
+{% block content %}
+<div style="max-width:480px; margin: 40px auto; background:var(--acc-card-bg); border:1px solid var(--acc-border); border-radius:12px; padding:28px; text-align:center;">
+    <h2 style="margin-top:0;">Thank You{% if giving.giver_name %}, {{ giving.giver_name }}{% endif %}!</h2>
+    <p style="color:var(--acc-muted);">
+        Your giving record of {{ giving.amount }} {{ giving.currency }} has been received. Our Finance team will
+        confirm it against the account and post it to our records.
+    </p>
+    {% if not giving.given_by_user %}
+    <p style="color:var(--acc-muted); font-size:.85rem;">We'll reach out if we need anything else to confirm your gift.</p>
+    {% else %}
+    <p style="color:var(--acc-muted); font-size:.85rem;">
+        You can check its status any time from <a href="{% url 'church:my_giving_history' %}">your giving history</a>.
+    </p>
+    {% endif %}
+    <a class="btn-secondary" href="{% url 'core:home' %}" style="margin-top:14px; display:inline-block;">Back to Home</a>
+</div>
+{% endblock %}

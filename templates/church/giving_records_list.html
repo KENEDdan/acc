@@ -1,0 +1,58 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Giving Submissions{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Giving / Donation Submissions{% endblock %}
+{% block dash_actions %}
+<a class="btn-secondary" href="{% url 'church:giving_accounts_list' %}">Giving Accounts</a>
+{% endblock %}
+{% block dash_content %}
+
+<div style="display:flex; gap:8px; margin-bottom:14px;">
+    <a class="btn-secondary {% if status == 'pending' %}btn-primary{% endif %}" href="?status=pending">Pending</a>
+    <a class="btn-secondary {% if status == 'confirmed' %}btn-primary{% endif %}" href="?status=confirmed">Confirmed</a>
+    <a class="btn-secondary {% if status == 'rejected' %}btn-primary{% endif %}" href="?status=rejected">Rejected</a>
+    <a class="btn-secondary" href="?status=all">All</a>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>From</th><th>Purpose</th><th>Amount</th><th>Account</th><th>Reference</th><th>Proof</th><th>Status</th><th>Submitted</th><th></th></tr></thead>
+        <tbody>
+        {% for r in records %}
+            <tr>
+                <td>{{ r.giver_name|default:"Anonymous" }}{% if r.contact_phone %}<div style="font-size:.75rem; color:var(--acc-muted);">{{ r.contact_phone }}</div>{% endif %}</td>
+                <td>{{ r.get_purpose_display }}</td>
+                <td>{{ r.amount }} {{ r.currency }}</td>
+                <td>{{ r.giving_account|default:"—" }}</td>
+                <td>{{ r.transaction_reference|default:"—" }}</td>
+                <td>{% if r.proof_of_payment %}<a href="{{ r.proof_of_payment.url }}" target="_blank" rel="noopener">View</a>{% else %}—{% endif %}</td>
+                <td>
+                    <span class="badge badge-{{ r.status }}">{{ r.get_status_display }}</span>
+                    {% if r.status == 'rejected' and r.review_note %}<div style="font-size:.75rem; color:var(--acc-muted); margin-top:4px;">{{ r.review_note }}</div>{% endif %}
+                </td>
+                <td>{{ r.submitted_at|date:"M d, Y" }}</td>
+                <td>
+                    {% if r.status == 'pending' %}
+                    <form method="post" action="{% url 'church:giving_record_confirm' r.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-primary" style="padding:4px 10px; font-size:.78rem;">Confirm</button>
+                    </form>
+                    <form method="post" action="{% url 'church:giving_record_reject' r.pk %}" style="display:inline-flex; gap:4px; align-items:center; margin-left:4px;">
+                        {% csrf_token %}
+                        <input type="text" name="review_note" placeholder="Reason (optional)" style="width:120px; padding:3px 6px; font-size:.78rem;">
+                        <button type="submit" class="btn-secondary" style="padding:4px 10px; font-size:.78rem;">Reject</button>
+                    </form>
+                    {% else %}
+                    &mdash;
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="9" class="dash-empty">No giving submissions in this view.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

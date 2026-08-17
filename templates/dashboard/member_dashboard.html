@@ -1,0 +1,90 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}My Dashboard{% endblock %}
+{% block dash_eyebrow %}Member{% endblock %}
+{% block dash_title %}{% if member_profile %}Welcome, {{ member_profile.full_name }}{% else %}Welcome{% endif %}{% endblock %}
+{% block dash_actions %}
+<a class="btn-secondary" href="{% url 'church:counseling_request_create' %}">Book Counseling</a>
+<a class="btn-secondary" href="{% url 'church:prayer_request_create' %}">Submit Prayer Request</a>
+<a class="btn-secondary" href="{% url 'church:giving_create' %}">Give</a>
+<a class="btn-primary" href="{% url 'aff:request_create' %}">+ Request AFF Assistance</a>
+{% endblock %}
+{% block dash_content %}
+
+{% if member_profile %}
+<div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-num">{{ member_profile.member_id }}</div><div class="kpi-label">Member ID</div></div>
+    <div class="kpi-card"><div class="kpi-num">{{ member_profile.get_membership_type_display }}</div><div class="kpi-label">Membership Type</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ member_profile.branch.name|default:"—" }}</div><div class="kpi-label">Branch</div></div>
+</div>
+{% endif %}
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>My AFF Requests</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Need</th><th>Amount</th><th>Status</th><th>Submitted</th><th></th></tr></thead>
+        <tbody>
+        {% for r in my_requests %}
+            <tr>
+                <td>{{ r.get_need_category_display }}</td>
+                <td>{{ r.amount_requested }} {{ r.currency }}</td>
+                <td><span class="badge badge-{{ r.status }}">{{ r.get_status_display }}</span></td>
+                <td>{{ r.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <a class="btn-secondary" href="{% url 'aff:request_detail' r.pk %}">View</a>
+                    {% if r.status == 'info_needed' %}<a class="btn-primary" href="{% url 'aff:request_resubmit' r.pk %}">Resubmit</a>{% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="dash-empty">You haven't submitted any prayer requests yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>My Counseling Sessions</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Status</th><th>Date</th><th>Time</th></tr></thead>
+        <tbody>
+        {% for s in my_counseling_sessions %}
+            <tr>
+                <td>
+                    {% if s.status == 'current' %}<span class="badge badge-active">It's your turn now!</span>
+                    {% elif s.status == 'scheduled' %}<span class="badge badge-pending">Scheduled</span>
+                    {% else %}<span class="badge badge-submitted">Requested</span>{% endif %}
+                </td>
+                <td>{{ s.scheduled_slot|date:"l, M d"|default:"Awaiting scheduling" }}</td>
+                <td>{{ s.scheduled_slot|date:"g:i A"|default:"-" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="3" class="dash-empty">No counseling sessions booked.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>My Giving</h3><a class="btn-secondary" href="{% url 'church:my_giving_history' %}">View All</a></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Purpose</th><th>Amount</th><th>Status</th><th>Submitted</th></tr></thead>
+        <tbody>
+        {% for r in my_giving_records %}
+            <tr>
+                <td>{{ r.get_purpose_display }}</td>
+                <td>{{ r.amount }} {{ r.currency }}</td>
+                <td><span class="badge badge-{{ r.status }}">{{ r.get_status_display }}</span></td>
+                <td>{{ r.submitted_at|date:"M d, Y" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="dash-empty">You haven't given yet — <a href="{% url 'church:giving_create' %}">give now</a>.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

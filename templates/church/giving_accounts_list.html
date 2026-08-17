@@ -1,0 +1,37 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Giving Accounts{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Giving Accounts (Bank / MoMo){% endblock %}
+{% block dash_actions %}
+<a class="btn-secondary" href="{% url 'church:giving_records_list' %}">Giving Submissions</a>
+<a class="btn-primary" href="{% url 'church:giving_account_create' %}">+ Add Account</a>
+{% endblock %}
+{% block dash_content %}
+<div class="dash-table-wrap">
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Label</th><th>Type</th><th>Details</th><th>Currency</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        {% for a in accounts %}
+            <tr>
+                <td>{{ a.label }}</td>
+                <td>{{ a.get_account_type_display }}</td>
+                <td style="color:var(--acc-muted); font-size:.85rem;">
+                    {% if a.account_type == 'bank' %}
+                        {{ a.bank_name }} — {{ a.account_number }}
+                    {% else %}
+                        {{ a.momo_provider }} — {{ a.momo_number }}
+                    {% endif %}
+                </td>
+                <td>{{ a.currency }}</td>
+                <td><span class="badge {% if a.is_active %}badge-active{% else %}badge-inactive{% endif %}">{% if a.is_active %}Active{% else %}Hidden{% endif %}</span></td>
+                <td><a class="btn-secondary" href="{% url 'church:giving_account_edit' a.pk %}">Edit</a></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="dash-empty">No giving accounts added yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

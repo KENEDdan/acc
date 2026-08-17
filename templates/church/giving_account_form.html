@@ -1,0 +1,33 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}{% if is_edit %}Edit Giving Account{% else %}Add Giving Account{% endif %}{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}{% if is_edit %}Edit Giving Account{% else %}Add Giving Account{% endif %}{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+<form method="post">
+    {% csrf_token %}
+    <div class="form-section">
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.account_type %}
+            {% include "partials/form_field.html" with field=form.label %}
+            {% include "partials/form_field.html" with field=form.currency %}
+            {% include "partials/form_field.html" with field=form.display_order %}
+            {% include "partials/form_field.html" with field=form.bank_name %}
+            {% include "partials/form_field.html" with field=form.account_name %}
+            {% include "partials/form_field.html" with field=form.account_number %}
+            {% include "partials/form_field.html" with field=form.branch_name %}
+            {% include "partials/form_field.html" with field=form.swift_code %}
+            {% include "partials/form_field.html" with field=form.momo_provider %}
+            {% include "partials/form_field.html" with field=form.momo_number %}
+            {% include "partials/form_field.html" with field=form.momo_registered_name %}
+            {% include "partials/form_field.html" with field=form.is_active %}
+            {% include "partials/form_field.html" with field=form.instructions wide=True %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">{% if is_edit %}Save Changes{% else %}Add Account{% endif %}</button>
+        <a class="btn-secondary" href="{% url 'church:giving_accounts_list' %}">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

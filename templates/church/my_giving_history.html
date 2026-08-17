@@ -1,0 +1,32 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}My Giving History{% endblock %}
+{% block dash_eyebrow %}Member{% endblock %}
+{% block dash_title %}My Giving History{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'church:giving_create' %}">+ Give Now</a>
+{% endblock %}
+{% block dash_content %}
+<div class="dash-table-wrap">
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Purpose</th><th>Amount</th><th>Account</th><th>Status</th><th>Submitted</th></tr></thead>
+        <tbody>
+        {% for r in records %}
+            <tr>
+                <td>{{ r.get_purpose_display }}</td>
+                <td>{{ r.amount }} {{ r.currency }}</td>
+                <td>{{ r.giving_account|default:"—" }}</td>
+                <td>
+                    <span class="badge badge-{{ r.status }}">{{ r.get_status_display }}</span>
+                    {% if r.status == 'rejected' and r.review_note %}<div style="font-size:.75rem; color:var(--acc-muted); margin-top:4px;">{{ r.review_note }}</div>{% endif %}
+                </td>
+                <td>{{ r.submitted_at|date:"M d, Y" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="dash-empty">You haven't submitted any giving records yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

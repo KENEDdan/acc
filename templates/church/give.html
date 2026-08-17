@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Give{% endblock %}
+{% block content %}
+<div style="max-width:640px; margin: 30px auto;">
+    <span class="eyebrow">Apostolic Campus Church</span>
+    <h1>Give — Tithes, Offerings &amp; Donations</h1>
+    <p style="color:var(--acc-muted); font-size:.9rem;">
+        You don't have to be a registered member to give. Send your tithe, offering, or donation to any of the
+        accounts below, then let us know using the form so our Finance team can confirm it.
+    </p>
+
+    <div style="margin-top:20px; display:grid; gap:14px;">
+        {% for account in accounts %}
+        <div style="background:var(--acc-card-bg); border:1px solid var(--acc-border); border-radius:12px; padding:18px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <strong>{{ account.label }}</strong>
+                <span class="badge {% if account.account_type == 'bank' %}badge-info_needed{% else %}badge-forwarded{% endif %}">{{ account.get_account_type_display }}</span>
+            </div>
+            {% if account.account_type == 'bank' %}
+            <p style="margin:8px 0 0 0; font-size:.88rem; color:var(--acc-muted); line-height:1.6;">
+                Bank: <strong style="color:inherit;">{{ account.bank_name }}</strong><br>
+                Account Name: <strong style="color:inherit;">{{ account.account_name }}</strong><br>
+                Account Number: <strong style="color:inherit;">{{ account.account_number }}</strong><br>
+                {% if account.branch_name %}Branch: {{ account.branch_name }}<br>{% endif %}
+                {% if account.swift_code %}SWIFT: {{ account.swift_code }}<br>{% endif %}
+                Currency: {{ account.currency }}
+            </p>
+            {% else %}
+            <p style="margin:8px 0 0 0; font-size:.88rem; color:var(--acc-muted); line-height:1.6;">
+                Provider: <strong style="color:inherit;">{{ account.momo_provider }}</strong><br>
+                Number: <strong style="color:inherit;">{{ account.momo_number }}</strong><br>
+                {% if account.momo_registered_name %}Registered Name: {{ account.momo_registered_name }}<br>{% endif %}
+                Currency: {{ account.currency }}
+            </p>
+            {% endif %}
+            {% if account.instructions %}
+            <p style="margin:8px 0 0 0; font-size:.82rem; color:var(--acc-muted); font-style:italic;">{{ account.instructions }}</p>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p style="color:var(--acc-muted); font-size:.9rem;">No giving accounts have been published yet — please check back soon.</p>
+        {% endfor %}
+    </div>
+
+    <h2 style="margin-top:28px; font-size:1.1rem;">Let Us Know What You Sent</h2>
+    <p style="color:var(--acc-muted); font-size:.85rem;">This helps our Finance team confirm your gift and record it accurately.</p>
+    <form method="post" enctype="multipart/form-data" style="margin-top:14px;">
+        {% csrf_token %}
+        {% for field in form %}
+        <p>
+            <label style="display:block; font-size:.82rem; font-weight:600; margin-bottom:4px;">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small style="color:var(--acc-muted); display:block; margin-top:3px;">{{ field.help_text }}</small>{% endif %}
+            {% if field.errors %}<div style="color:#B5453D; font-size:.8rem; margin-top:3px;">{{ field.errors }}</div>{% endif %}
+        </p>
+        {% endfor %}
+        <button type="submit" class="btn-primary" style="width:100%; margin-top:10px;">Submit Giving Record</button>
+    </form>
+
+    {% if user.is_authenticated %}
+    <p style="color:var(--acc-muted); font-size:.8rem; margin-top:16px;">
+        <a href="{% url 'church:my_giving_history' %}">View your giving history</a>.
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+from django.urls import path
+from . import views
+
+app_name = 'church'
+
+urlpatterns = [
+    path('', views.ChurchHomeView.as_view(), name='home'),
+    path('console/', views.ChurchConsoleView.as_view(), name='console'),
+    path('about/', views.AboutUsView.as_view(), name='about'),
+    path('activities/', views.ActivityListView.as_view(), name='activities'),
+    path('activities/<int:pk>/', views.ActivityDetailView.as_view(), name='activity_detail'),
+    path('branches/', views.BranchListView.as_view(), name='branches'),
+    path('branches/new/', views.branch_create, name='branch_create'),
+    path('pastors-elders/', views.PastorElderListView.as_view(), name='pastors_elders'),
+    path('pastors-elders/new/', views.pastor_elder_create, name='pastor_elder_create'),
+    path('live/', views.LiveView.as_view(), name='live'),
+    path('sermons/', views.SermonListView.as_view(), name='sermons'),
+    path('teachings/', views.TeachingListView.as_view(), name='teachings'),
+    path('library/', views.LibraryListView.as_view(), name='library'),
+
+    path('members/new/', views.member_create, name='member_create'),
+    path('members/', views.members_list, name='members_list'),
+    path('members/<int:pk>/', views.member_detail, name='member_detail'),
+    path('members/<int:pk>/edit/', views.member_edit, name='member_edit'),
+    path('members/reset-password/', views.member_reset_password, name='member_reset_password'),
+    path('discipleship/new/', views.discipleship_create, name='discipleship_create'),
+    path('finance/new/', views.finance_create, name='finance_create'),
+
+    path('give/', views.giving_create, name='giving_create'),
+    path('give/history/', views.my_giving_history, name='my_giving_history'),
+    path('dashboard/finance/giving-accounts/', views.giving_accounts_list, name='giving_accounts_list'),
+    path('dashboard/finance/giving-accounts/new/', views.giving_account_create, name='giving_account_create'),
+    path('dashboard/finance/giving-accounts/<int:pk>/edit/', views.giving_account_edit, name='giving_account_edit'),
+    path('dashboard/finance/giving-records/', views.giving_records_list, name='giving_records_list'),
+    path('dashboard/finance/giving-records/<int:pk>/confirm/', views.giving_record_confirm, name='giving_record_confirm'),
+    path('dashboard/finance/giving-records/<int:pk>/reject/', views.giving_record_reject, name='giving_record_reject'),
+
+    path('feed/new/', views.feed_item_create, name='feed_item_create'),
+    path('media/new/', views.media_item_create, name='media_item_create'),
+    path('library/new/', views.library_item_create, name='library_item_create'),
+    path('live/start/', views.live_start, name='live_start'),
+    path('live/end/', views.live_end, name='live_end'),
+
+    path('dashboard/info/', views.InfoDashboardView.as_view(), name='info_dashboard'),
+    path('dashboard/finance/', views.FinanceDashboardView.as_view(), name='finance_dashboard'),
+    path('dashboard/membership/', views.MembershipDashboardView.as_view(), name='membership_dashboard'),
+    path('dashboard/discipleship/', views.DiscipleshipDashboardView.as_view(), name='discipleship_dashboard'),
+    path('dashboard/media/', views.MediaDashboardView.as_view(), name='media_dashboard'),
+
+    path('members/<int:pk>/id-card/', views.member_id_card, name='member_id_card'),
+    path('verify/<str:member_id>/', views.member_verify, name='member_verify'),
+
+    path('prayer-requests/new/', views.prayer_request_create, name='prayer_request_create'),
+    path('prayer-requests/lookup/', views.prayer_request_lookup, name='prayer_request_lookup'),
+    path('prayer-requests/', views.prayer_requests_list, name='prayer_requests_list'),
+    path('prayer-requests/<int:pk>/', views.prayer_request_detail, name='prayer_request_detail'),
+    path('prayer-requests/<int:pk>/forward/', views.prayer_request_forward, name='prayer_request_forward'),
+    path('prayer-requests/<int:pk>/respond/', views.prayer_request_respond, name='prayer_request_respond'),
+
+    path('attendance/new/', views.attendance_create, name='attendance_create'),
+    path('attendance/reports/', views.attendance_reports, name='attendance_reports'),
+
+    path('counseling/new/', views.counseling_request_create, name='counseling_request_create'),
+    path('counseling/requests/', views.counseling_requests_list, name='counseling_requests_list'),
+    path('counseling/<int:pk>/schedule/', views.counseling_schedule, name='counseling_schedule'),
+    path('counseling/queue/', views.counseling_queue, name='counseling_queue'),
+    path('counseling/queue/next/', views.counseling_next, name='counseling_next'),
+]
