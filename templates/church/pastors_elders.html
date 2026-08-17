@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Pastors &amp; Elders{% endblock %}
+{% block content %}
+<div class="section-head">
+    <div>
+        <span class="eyebrow">Apostolic Campus Church</span>
+        <h1>Pastors &amp; Elders</h1>
+    </div>
+    {% if user.is_authenticated and user.is_superadmin %}
+    <a class="btn-primary" href="{% url 'church:pastor_elder_create' %}">+ Add Pastor / Elder</a>
+    {% endif %}
+</div>
+<div class="feed-grid">
+    {% for leader in leaders %}
+    <div class="feed-card">
+        {% if leader.photo %}
+        <img src="{{ leader.photo.url }}" alt="{{ leader.full_name }}">
+        {% else %}
+        <div class="no-image"></div>
+        {% endif %}
+        <div class="feed-card-body">
+            <span class="feed-type-tag">{{ leader.display_role }}</span>
+            <h3>{{ leader.full_name }}</h3>
+            {% if leader.branch %}<p><strong>Branch:</strong> {{ leader.branch.name }}</p>{% endif %}
+            {% if leader.phone_number %}<p><strong>Phone:</strong> {{ leader.phone_number }}</p>{% endif %}
+            {% if leader.email %}<p><strong>Email:</strong> {{ leader.email }}</p>{% endif %}
+            <p>{{ leader.biography|truncatewords:30 }}</p>
+        </div>
+    </div>
+    {% empty %}
+    <p>No pastors or elders added yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Attendance Reports{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Attendance Reports{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'church:attendance_create' %}">+ Record Attendance</a>
+{% endblock %}
+{% block dash_content %}
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Weekly</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Week Of</th><th>Total</th><th>Average per Entry</th></tr></thead>
+        <tbody>
+        {% for row in weekly %}
+            <tr><td>{{ row.period|date:"M d, Y" }}</td><td>{{ row.total }}</td><td>{{ row.avg|floatformat:0 }}</td></tr>
+        {% empty %}
+            <tr><td colspan="3" class="dash-empty">No attendance recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Monthly</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Month</th><th>Total</th><th>Average per Entry</th></tr></thead>
+        <tbody>
+        {% for row in monthly %}
+            <tr><td>{{ row.period|date:"F Y" }}</td><td>{{ row.total }}</td><td>{{ row.avg|floatformat:0 }}</td></tr>
+        {% empty %}
+            <tr><td colspan="3" class="dash-empty">No attendance recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Annual</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Year</th><th>Total</th><th>Average per Entry</th></tr></thead>
+        <tbody>
+        {% for row in annual %}
+            <tr><td>{{ row.period|date:"Y" }}</td><td>{{ row.total }}</td><td>{{ row.avg|floatformat:0 }}</td></tr>
+        {% empty %}
+            <tr><td colspan="3" class="dash-empty">No attendance recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Recent Entries</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Date</th><th>Branch</th><th>Count</th><th>Notes</th><th>Recorded By</th></tr></thead>
+        <tbody>
+        {% for a in recent %}
+            <tr>
+                <td>{{ a.date }}</td>
+                <td>{{ a.branch.name|default:"All Branches" }}</td>
+                <td>{{ a.count }}</td>
+                <td>{{ a.notes|default:"—" }}</td>
+                <td>{{ a.recorded_by.get_full_name|default:a.recorded_by.username }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="dash-empty">No attendance recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Today's Counseling Queue{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Today's Queue &mdash; {{ today|date:"M d, Y" }}{% endblock %}
+{% block dash_actions %}
+{% if user.is_superadmin %}
+<form method="post" action="{% url 'church:counseling_next' %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn-primary">Next &rarr;</button>
+</form>
+{% endif %}
+<a class="btn-secondary" href="{% url 'church:counseling_requests_list' %}">All Requests</a>
+{% endblock %}
+{% block dash_content %}
+
+<div class="dash-table-wrap">
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Time</th><th>Name</th><th>Phone</th><th>Topic</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for s in todays_sessions %}
+            <tr {% if s.status == 'current' %}style="background:rgba(124,140,62,.08); font-weight:600;"{% endif %}>
+                <td>{{ s.scheduled_slot|date:"g:i A" }}</td>
+                <td>{{ s.full_name }}{% if not s.booked_by_user %} <span class="badge badge-pending">No account</span>{% endif %}</td>
+                <td>{{ s.contact_phone }}</td>
+                <td>{{ s.topic|default:"-" }}</td>
+                <td>
+                    {% if s.status == 'current' %}<span class="badge badge-active">Now Being Seen</span>
+                    {% elif s.status == 'completed' %}<span class="badge badge-disbursed">Completed</span>
+                    {% else %}<span class="badge badge-pending">Waiting</span>{% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="dash-empty">No sessions scheduled for today.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+{% if not user.is_superadmin %}
+<p class="form-section-hint" style="margin-top:14px;">Only the pastor can advance the queue. If the next person has no account on file, please help notify them directly.</p>
+{% endif %}
+{% endblock %}

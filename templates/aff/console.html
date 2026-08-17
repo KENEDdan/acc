@@ -1,0 +1,46 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}AFF Console{% endblock %}
+{% block dash_eyebrow %}Apostles' Feet Foundation{% endblock %}
+{% block dash_title %}Management Console{% endblock %}
+{% block dash_actions %}
+<a class="btn-secondary" href="{% url 'aff:home' %}" target="_blank">View Public Page</a>
+{% endblock %}
+{% block dash_content %}
+<div class="kpi-grid">
+    <div class="kpi-card alert"><div class="kpi-num">{{ pending_count }}</div><div class="kpi-label">Pending Requests</div></div>
+    {% for row in finance_breakdown %}
+    <div class="kpi-card accent"><div class="kpi-num">{{ row.balance }}</div><div class="kpi-label">Balance ({{ row.currency }})</div></div>
+    {% endfor %}
+</div>
+
+<h2 class="dash-subhead">Management Areas</h2>
+<div class="feed-grid">
+    <a class="feed-card" href="{% url 'aff:info_dashboard' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Content</span><h3>Information &amp; Feed</h3><p>AFF stories and updates.</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'aff:finance_dashboard' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Finance</span><h3>Finance &amp; Requests</h3><p>Assistance requests, disbursements, and cash reconciliation.</p></div>
+    </a>
+</div>
+
+<h2 class="dash-subhead">Audit Log</h2>
+<div class="dash-table-wrap">
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>When</th><th>Action</th><th>Record</th><th>By</th></tr></thead>
+        <tbody>
+        {% for log in audit_logs %}
+            <tr>
+                <td style="white-space:nowrap;">{{ log.created_at|date:"M d, Y H:i" }}</td>
+                <td><span class="badge badge-active">{{ log.get_action_display }}</span></td>
+                <td>{{ log.model_name }}: {{ log.object_repr }}</td>
+                <td>{{ log.actor.get_full_name|default:log.actor.username|default:"—" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="dash-empty">No activity recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

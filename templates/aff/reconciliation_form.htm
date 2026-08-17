@@ -1,0 +1,26 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Reconcile Cash{% endblock %}
+{% block dash_eyebrow %}Apostles' Feet Foundation{% endblock %}
+{% block dash_title %}Reconcile Cash at Hand{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+<div class="form-top-note">Enter what's physically at hand and where it came from. The system compares it against recorded totals to flag any discrepancy.</div>
+<form method="post">
+    {% csrf_token %}
+    <div class="form-section">
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.date %}
+            {% include "partials/form_field.html" with field=form.currency %}
+            {% include "partials/form_field.html" with field=form.cash_at_hand %}
+            {% include "partials/form_field.html" with field=form.system_recorded_balance %}
+            {% include "partials/form_field.html" with field=form.source wide=True %}
+            {% include "partials/form_field.html" with field=form.notes wide=True %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Save Reconciliation</button>
+        <a class="btn-secondary" href="{% url 'aff:finance_dashboard' %}">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

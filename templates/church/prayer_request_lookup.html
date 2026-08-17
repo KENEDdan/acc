@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Check Prayer Request{% endblock %}
+{% block content %}
+<div style="max-width:480px; margin: 30px auto;">
+    <span class="eyebrow">Apostolic Campus Church</span>
+    <h1>Check Your Prayer Request</h1>
+    <form method="get" style="margin-top:16px;">
+        <p>
+            <label style="display:block; font-size:.82rem; font-weight:600; margin-bottom:4px;">Reference Code</label>
+            <input type="text" name="code" value="{{ code }}" placeholder="e.g. PR-3F9A2C1B" style="text-transform:uppercase;">
+        </p>
+        <button type="submit" class="btn-primary">Check</button>
+    </form>
+
+    {% if error %}
+    <p style="color:#B5453D; margin-top:16px;">{{ error }}</p>
+    {% endif %}
+
+    {% if prayer_request %}
+    <div style="margin-top:20px; background:var(--acc-card-bg); border:1px solid var(--acc-border); border-radius:12px; padding:20px;">
+        <p><span class="badge badge-{{ prayer_request.status }}">{{ prayer_request.get_status_display }}</span></p>
+        <p style="color:var(--acc-muted); font-size:.85rem;">Submitted {{ prayer_request.created_at|date:"M d, Y" }}</p>
+        <p style="white-space:pre-wrap;">{{ prayer_request.request_text }}</p>
+
+        {% if prayer_request.response_text %}
+        <div class="form-top-note" style="margin-top:14px;">
+            <strong>Response:</strong><br>
+            {{ prayer_request.response_text }}
+        </div>
+        {% else %}
+        <p style="color:var(--acc-muted); font-size:.85rem;">No response yet — check back soon.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

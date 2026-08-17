@@ -1,0 +1,58 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Schedule Session{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Schedule {{ session.full_name }}{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+    <div class="form-section">
+        <h3 class="form-section-title">Request Details</h3>
+        <p class="form-section-hint">
+            {{ session.contact_phone }}
+            {% if session.topic %} &middot; {{ session.topic }}{% endif %}
+            &middot; Preferred date: {{ session.preferred_date }}
+        </p>
+    </div>
+
+    <div class="form-section">
+        <h3 class="form-section-title">Choose a Date</h3>
+        <p class="form-section-hint">Sessions run Mondays and Wednesdays only, 8:00 AM - 4:00 PM.</p>
+        <form method="get">
+            <div class="form-grid">
+                <div class="form-field">
+                    <label>{{ date_form.date.label }}</label>
+                    {{ date_form.date }}
+                    {% if date_form.date.errors %}<div style="color:#B5453D; font-size:.8rem; margin-top:3px;">{{ date_form.date.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-secondary">Check Availability</button>
+            </div>
+        </form>
+    </div>
+
+    {% if chosen_date %}
+    <div class="form-section">
+        <h3 class="form-section-title">Available Hours - {{ chosen_date|date:"l, M d" }}</h3>
+        {% if available_hours %}
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="date" value="{{ chosen_date|date:'Y-m-d' }}">
+            <div class="form-grid">
+                {% for hour in available_hours %}
+                <button type="submit" name="hour" value="{{ hour }}" class="btn-secondary" style="text-align:center;">
+                    {% if hour < 12 %}{{ hour }}:00 AM{% elif hour == 12 %}12:00 PM{% else %}{{ hour|add:"-12" }}:00 PM{% endif %}
+                </button>
+                {% endfor %}
+            </div>
+        </form>
+        {% else %}
+        <p class="form-section-hint">No open hours on this date - every slot is taken. Please choose another date.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="form-actions">
+        <a class="btn-secondary" href="{% url 'church:counseling_requests_list' %}">Cancel</a>
+    </div>
+</div>
+{% endblock %}

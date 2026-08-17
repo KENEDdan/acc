@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Our Branches{% endblock %}
+{% block content %}
+<div class="section-head">
+    <div>
+        <span class="eyebrow">Apostolic Campus Church</span>
+        <h1>Our Branches</h1>
+    </div>
+    {% if user.is_authenticated and user.is_superadmin %}
+    <a class="btn-primary" href="{% url 'church:branch_create' %}">+ Add Branch</a>
+    {% endif %}
+</div>
+<div class="feed-grid">
+    {% for branch in branches %}
+    <div class="feed-card">
+        <div class="no-image"></div>
+        <div class="feed-card-body">
+            <h3>{{ branch.name }}</h3>
+            <p>{{ branch.location }}</p>
+            {% if branch.leader_name %}<p><strong>Pastor in Charge / Elder:</strong> {{ branch.leader_name }}</p>{% endif %}
+            {% if branch.capacity %}<p><strong>Capacity:</strong> {{ branch.capacity }}</p>{% endif %}
+            <p><strong>Disciples:</strong> {{ branch.disciples_count }}</p>
+            {% if branch.history %}<p>{{ branch.history|truncatewords:28 }}</p>{% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <p>No branches added yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

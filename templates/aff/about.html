@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}About AFF{% endblock %}
+{% block content %}
+<h1>About Apostles' Feet Foundation</h1>
+{% if about %}<div>{{ about.content|linebreaks }}</div>{% else %}<p>Content coming soon.</p>{% endif %}
+{% endblock %}

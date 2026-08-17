@@ -1,0 +1,29 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Respond to Prayer Request{% endblock %}
+{% block dash_eyebrow %}{{ prayer_request.reference_code }}{% endblock %}
+{% block dash_title %}Respond to {{ prayer_request.submitted_by_name|default:"Anonymous" }}{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+    <div class="form-section">
+        <h3 class="form-section-title">Their Request</h3>
+        <p style="white-space:pre-wrap;">{{ prayer_request.request_text }}</p>
+    </div>
+    <div class="form-section">
+        <h3 class="form-section-title">Your Response</h3>
+        <p class="form-section-hint">This is shown to the Membership Admin and, if the person is a registered member, sent to them directly.</p>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <p>
+                {{ field }}
+                {% if field.errors %}<div style="color:#B5453D; font-size:.8rem; margin-top:3px;">{{ field.errors }}</div>{% endif %}
+            </p>
+            {% endfor %}
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Save Response</button>
+                <a class="btn-secondary" href="{% url 'church:prayer_request_detail' prayer_request.pk %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

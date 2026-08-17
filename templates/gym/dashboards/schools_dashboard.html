@@ -1,0 +1,33 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Schools Dashboard{% endblock %}
+{% block dash_eyebrow %}Global Youth Ministry{% endblock %}
+{% block dash_title %}Schools Dashboard{% endblock %}
+{% block dash_actions %}
+<a class="btn-secondary" href="{% url 'gym:school_create' %}">+ Add School</a>
+<a class="btn-secondary" href="{% url 'gym:school_volunteer_create' %}">+ Add Volunteer</a>
+<a class="btn-secondary" href="{% url 'gym:school_disciple_create' %}">+ Add Disciple</a>
+<a class="btn-primary" href="{% url 'gym:school_member_create' %}">+ Add Member</a>
+{% endblock %}
+{% block dash_content %}
+<div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-num">{{ schools.count }}</div><div class="kpi-label">Active Schools</div></div>
+    <div class="kpi-card"><div class="kpi-num">{{ total_members }}</div><div class="kpi-label">Members</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ total_volunteers }}</div><div class="kpi-label">Volunteers</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ total_disciples }}</div><div class="kpi-label">Disciples</div></div>
+</div>
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Schools</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>School</th><th>Location</th><th></th></tr></thead>
+        <tbody>
+        {% for school in schools %}
+            <tr><td>{{ school.name }}</td><td>{{ school.location }}</td><td><a class="btn-secondary" href="{% url 'gym:school_detail' school.pk %}">View</a></td></tr>
+        {% empty %}
+            <tr><td colspan="3" class="dash-empty">No schools added yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

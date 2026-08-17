@@ -1,0 +1,76 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Members{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}All Members{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'church:member_create' %}">+ Register New Member</a>
+{% endblock %}
+{% block dash_content %}
+
+<div class="form-section">
+    <form method="get">
+        <div class="form-grid">
+            <div class="form-field">
+                <label>Search</label>
+                <input type="text" name="q" value="{{ query }}" placeholder="Name, member ID, or phone">
+            </div>
+            <div class="form-field">
+                <label>Branch</label>
+                <select name="branch">
+                    <option value="">All Branches</option>
+                    {% for b in branches %}
+                    <option value="{{ b.pk }}" {% if branch_id == b.pk|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-field">
+                <label>Membership Type</label>
+                <select name="type">
+                    <option value="">All Types</option>
+                    {% for value, label in membership_types %}
+                    <option value="{{ value }}" {% if membership_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-secondary">Search</button>
+            <a class="btn-secondary" href="{% url 'church:members_list' %}">Clear</a>
+        </div>
+    </form>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Member ID</th><th>Name</th><th>Type</th><th>Branch</th><th>Phone</th><th></th></tr></thead>
+        <tbody>
+        {% for m in page_obj %}
+            <tr>
+                <td>{{ m.member_id }}</td>
+                <td>{{ m.full_name }}</td>
+                <td><span class="badge badge-active">{{ m.get_membership_type_display }}</span></td>
+                <td>{{ m.branch.name|default:"-" }}</td>
+                <td>{{ m.contact_phone }}</td>
+                <td><a class="btn-secondary" href="{% url 'church:member_detail' m.pk %}">View</a></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="dash-empty">No members found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="form-actions">
+    {% if page_obj.has_previous %}
+    <a class="btn-secondary" href="?q={{ query }}&branch={{ branch_id }}&type={{ membership_type }}&page={{ page_obj.previous_page_number }}">&larr; Previous</a>
+    {% endif %}
+    <span class="form-section-hint" style="align-self:center;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a class="btn-secondary" href="?q={{ query }}&branch={{ branch_id }}&type={{ membership_type }}&page={{ page_obj.next_page_number }}">Next &rarr;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

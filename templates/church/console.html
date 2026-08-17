@@ -1,0 +1,63 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Church Console{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Management Console{% endblock %}
+{% block dash_actions %}
+<a class="btn-secondary" href="{% url 'church:home' %}" target="_blank">View Public Page</a>
+{% endblock %}
+{% block dash_content %}
+<div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-num">{{ member_count }}</div><div class="kpi-label">Members</div></div>
+    <div class="kpi-card"><div class="kpi-num">{{ branch_count }}</div><div class="kpi-label">Branches</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ ongoing_disciples }}</div><div class="kpi-label">Ongoing Disciples</div></div>
+    {% for row in finance_breakdown %}
+    <div class="kpi-card accent"><div class="kpi-num">{{ row.balance }}</div><div class="kpi-label">Balance ({{ row.currency }})</div></div>
+    {% endfor %}
+</div>
+
+<h2 class="dash-subhead">Management Areas</h2>
+<div class="feed-grid">
+    <a class="feed-card" href="{% url 'church:info_dashboard' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Content</span><h3>Information &amp; Feed</h3><p>News, events, reminders, daily encouragement.</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'church:finance_dashboard' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Finance</span><h3>Finance Records</h3><p>Income and expense entries, by currency.</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'church:membership_dashboard' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">People</span><h3>Membership</h3><p>Member registrations and ID records.</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'church:discipleship_dashboard' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Growth</span><h3>Discipleship</h3><p>Phase enrollments and progress.</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'church:media_dashboard' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Media</span><h3>Live &amp; Media</h3><p>Sermons, teachings, and live service control.</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'church:branches' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Structure</span><h3>Branches</h3><p>Branch details, capacity, and history. Added by the superadmin.</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'church:pastors_elders' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Structure</span><h3>Pastors &amp; Elders</h3><p>The public leadership directory. Added by the superadmin.</p></div>
+    </a>
+</div>
+
+<h2 class="dash-subhead">Audit Log</h2>
+<div class="dash-table-wrap">
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>When</th><th>Action</th><th>Record</th><th>By</th></tr></thead>
+        <tbody>
+        {% for log in audit_logs %}
+            <tr>
+                <td style="white-space:nowrap;">{{ log.created_at|date:"M d, Y H:i" }}</td>
+                <td><span class="badge badge-active">{{ log.get_action_display }}</span></td>
+                <td>{{ log.model_name }}: {{ log.object_repr }}</td>
+                <td>{{ log.actor.get_full_name|default:log.actor.username|default:"—" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="dash-empty">No activity recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

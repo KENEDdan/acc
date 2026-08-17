@@ -1,0 +1,36 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Member Registered{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}{{ member.full_name }} Registered{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+    <div class="form-section">
+        <h3 class="form-section-title">Registered as {{ member.get_membership_type_display }}</h3>
+        <p class="form-section-hint">Member ID: <strong>{{ member.member_id }}</strong></p>
+    </div>
+
+    {% if temp_password %}
+    <div class="form-top-note">
+        <strong>Their login was just created — this password is shown only once.</strong><br>
+        Please write it down and share it with {{ member.full_name }} securely (in person or by a channel only they can see).
+        <div style="margin-top:12px; font-family:monospace; font-size:1.1rem; background:var(--acc-card-bg); border:1px solid var(--acc-border); border-radius:8px; padding:12px;">
+            Username: <strong>{{ member.member_id }}</strong><br>
+            Temporary password: <strong>{{ temp_password }}</strong>
+        </div>
+        <p style="margin-top:10px; margin-bottom:0;">
+            They'll be asked to set their own password the first time they log in at
+            <a href="{% url 'core:portal' %}">{% url 'core:portal' %}</a>.
+        </p>
+    </div>
+    {% else %}
+    <div class="form-top-note">
+        This member already has a login account.
+    </div>
+    {% endif %}
+
+    <div class="form-actions">
+        <a class="btn-primary" href="{% url 'church:membership_dashboard' %}">Done</a>
+        <a class="btn-secondary" href="{% url 'church:member_create' %}">Register Another Member</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Admin Accounts{% endblock %}
+{% block dash_eyebrow %}Superadmin{% endblock %}
+{% block dash_title %}Admin Accounts{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'dashboard:create_account' %}">+ Create Admin Account</a>
+{% endblock %}
+{% block dash_content %}
+<div class="dash-table-wrap">
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Email</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for a in accounts %}
+            <tr>
+                <td>{{ a.username }}</td>
+                <td>{{ a.get_full_name|default:"—" }}</td>
+                <td><span class="badge badge-active">{{ a.get_role_display }}</span></td>
+                <td>{{ a.email|default:"—" }}</td>
+                <td>{% if a.is_active %}<span class="badge badge-active">Active</span>{% else %}<span class="badge badge-inactive">Inactive</span>{% endif %}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="dash-empty">No admin accounts created yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

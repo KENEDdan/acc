@@ -1,0 +1,116 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}AFF Finance Dashboard{% endblock %}
+{% block dash_eyebrow %}Apostles' Feet Foundation{% endblock %}
+{% block dash_title %}Finance &amp; Requests Dashboard{% endblock %}
+{% block dash_actions %}
+<a class="btn-secondary" href="{% url 'aff:reconciliation_create' %}">+ Reconcile Cash</a>
+<a class="btn-secondary" href="{% url 'aff:finance_create' %}">+ Record Entry</a>
+<a class="btn-primary" href="{% url 'aff:request_create' %}">+ Fill Request</a>
+{% endblock %}
+{% block dash_content %}
+<div class="witness-band" style="margin-top:0;">
+    {% for row in finance_breakdown %}
+    <div class="witness-stat"><div class="witness-num">{{ row.balance }} {{ row.currency }}</div><div class="witness-label">Current Balance</div></div>
+    {% endfor %}
+</div>
+<div class="kpi-grid">
+    {% for row in finance_breakdown %}
+    <div class="kpi-card"><div class="kpi-num">{{ row.income }}</div><div class="kpi-label">Income ({{ row.currency }})</div></div>
+    <div class="kpi-card alert"><div class="kpi-num">{{ row.expense }}</div><div class="kpi-label">Disbursed ({{ row.currency }})</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ row.balance }}</div><div class="kpi-label">Balance ({{ row.currency }})</div></div>
+    {% empty %}
+    <p style="color:var(--acc-muted);">No AFF finance records yet.</p>
+    {% endfor %}
+</div>
+<div class="kpi-grid">
+    <div class="kpi-card alert"><div class="kpi-num">{{ submitted_requests.count }}</div><div class="kpi-label">New Member Requests</div></div>
+    <div class="kpi-card alert"><div class="kpi-num">{{ pending_requests.count }}</div><div class="kpi-label">Pending Requests</div></div>
+    <div class="kpi-card"><div class="kpi-num">{{ approved_requests.count }}</div><div class="kpi-label">Approved</div></div>
+    <div class="kpi-card"><div class="kpi-num">{{ declined_requests.count }}</div><div class="kpi-label">Declined</div></div>
+    <div class="kpi-card alert"><div class="kpi-num">{{ info_needed_requests.count }}</div><div class="kpi-label">Info Needed</div></div>
+</div>
+
+{% if submitted_requests %}
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>New Member Requests &mdash; Awaiting Your Review</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Name</th><th>Need</th><th>Amount</th><th>Submitted</th><th></th></tr></thead>
+        <tbody>
+        {% for r in submitted_requests %}
+            <tr>
+                <td>{{ r.full_name }}</td>
+                <td>{{ r.get_need_category_display }}</td>
+                <td>{{ r.amount_requested }} {{ r.currency }}</td>
+                <td>{{ r.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <a class="btn-secondary" href="{% url 'aff:request_detail' r.pk %}">Review</a>
+                    <form method="post" action="{% url 'aff:request_forward' r.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-primary">Forward to Superadmin</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>All Requests</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Name</th><th>Need</th><th>Amount</th><th>Status</th><th>Submitted</th><th></th></tr></thead>
+        <tbody>
+        {% for r in all_requests %}
+            <tr>
+                <td>{{ r.full_name }}</td>
+                <td>{{ r.get_need_category_display }}</td>
+                <td>{{ r.amount_requested }} {{ r.currency }}</td>
+                <td><span class="badge badge-{{ r.status }}">{{ r.get_status_display }}</span></td>
+                <td>{{ r.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <a class="btn-secondary" href="{% url 'aff:request_detail' r.pk %}">View</a>
+                    {% if r.status == 'submitted' %}
+                    <form method="post" action="{% url 'aff:request_forward' r.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-primary">Forward</button>
+                    </form>
+                    {% endif %}
+                    {% if r.status == 'approved' %}<a class="btn-secondary" href="{% url 'aff:request_disburse' r.pk %}">Disburse</a>{% endif %}
+                    {% if r.status == 'info_needed' %}<a class="btn-primary" href="{% url 'aff:request_resubmit' r.pk %}">Resubmit</a>{% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="dash-empty">No requests yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Recent Cash Reconciliations</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Date</th><th>Currency</th><th>Cash at Hand</th><th>System Recorded</th><th>Discrepancy</th><th>Source</th></tr></thead>
+        <tbody>
+        {% for rec in recent_reconciliations %}
+            <tr>
+                <td>{{ rec.date }}</td>
+                <td>{{ rec.currency }}</td>
+                <td>{{ rec.cash_at_hand }}</td>
+                <td>{{ rec.system_recorded_balance }}</td>
+                <td>{% if rec.discrepancy %}<span class="badge badge-declined">{{ rec.discrepancy }}</span>{% else %}<span class="badge badge-active">0</span>{% endif %}</td>
+                <td>{{ rec.source }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="dash-empty">No reconciliations recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

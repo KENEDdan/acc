@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Session Requested{% endblock %}
+{% block content %}
+<div style="max-width:480px; margin: 40px auto; background:var(--acc-card-bg); border:1px solid var(--acc-border); border-radius:12px; padding:28px; text-align:center;">
+    <h2 style="margin-top:0;">Request Received</h2>
+    <p style="color:var(--acc-muted);">
+        Thank you, {{ session.full_name }}. Our Membership team will confirm a date for your session and let you know your place in the queue.
+    </p>
+    {% if not session.booked_by_user %}
+    <p style="color:var(--acc-muted); font-size:.85rem;">We'll reach you at {{ session.contact_phone }} to confirm.</p>
+    {% else %}
+    <p style="color:var(--acc-muted); font-size:.85rem;">You can check your status any time from your dashboard.</p>
+    {% endif %}
+    <a class="btn-secondary" href="{% url 'core:home' %}" style="margin-top:14px; display:inline-block;">Back to Home</a>
+</div>
+{% endblock %}

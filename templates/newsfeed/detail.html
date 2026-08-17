@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }}{% endblock %}
+{% block content %}
+<a href="javascript:history.back()">&larr; Back</a>
+<h1>{{ item.title }}</h1>
+<p style="color:var(--acc-muted);">{{ item.get_scope_display }} &bull; {{ item.get_item_type_display }} &bull; {{ item.published_at|date:"M d, Y H:i" }}</p>
+{% if item.image %}
+<img src="{{ item.image.url }}" alt="{{ item.title }}" style="max-width:100%; border-radius:10px; margin: 12px 0;">
+{% endif %}
+<div>{{ item.body|linebreaks }}</div>
+{% endblock %}

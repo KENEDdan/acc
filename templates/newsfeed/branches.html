@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Our Branches{% endblock %}
+{% block content %}
+<h1>Our Branches</h1>
+<div class="feed-grid">
+    {% for branch in branches %}
+    <div class="feed-card">
+        <div class="no-image"></div>
+        <div class="feed-card-body">
+            <h3>{{ branch.name }}</h3>
+            <p>{{ branch.location }}</p>
+            {% if branch.leader_name %}<p>Leader: {{ branch.leader_name }}</p>{% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <p>No branches added yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

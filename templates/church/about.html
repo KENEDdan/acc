@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}About Church (ACC){% endblock %}
+{% block content %}
+<h1>About Apostolic Campus Church</h1>
+{% if about %}
+<div>{{ about.content|linebreaks }}</div>
+{% else %}
+<p>Church history and mission content will be added here soon.</p>
+{% endif %}
+{% endblock %}

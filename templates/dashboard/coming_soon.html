@@ -1,0 +1,7 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block dash_title %}{{ role }} Dashboard{% endblock %}
+{% block dash_content %}
+<p style="color:var(--acc-muted);">This dashboard is scheduled for a later step. You're logged in successfully.</p>
+<a class="btn-secondary" href="{% url 'core:home' %}">Back to home</a>
+{% endblock %}

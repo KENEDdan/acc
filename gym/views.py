@@ -1,0 +1,263 @@
+from django.views.generic import TemplateView, ListView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Sum
+from django.utils import timezone
+
+from newsfeed.models import FeedItem, FeedItemManager
+from finance.utils import currency_breakdown
+from audit.models import AuditLog
+from .models import School, SchoolMember, SchoolVolunteer, SchoolDisciple, SchoolActivity, AboutUs, FinanceRecord
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.utils import timezone as tz
+from newsfeed.forms import FeedItemForm
+from .forms import SchoolForm, SchoolMemberForm, SchoolVolunteerForm, SchoolDiscipleForm, SchoolActivityForm, GymFinanceForm
+
+
+class GymHomeView(TemplateView):
+    template_name = "gym/home.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['feed_items'] = FeedItemManager.active(scope=FeedItem.Scope.GYM)[:30]
+        ctx['school_count'] = School.objects.filter(is_active=True).count()
+        return ctx
+
+
+class GymAboutUsView(TemplateView):
+    template_name = "gym/about.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['about'] = AboutUs.objects.first()
+        return ctx
+
+
+class SchoolListView(ListView):
+    model = School
+    template_name = "gym/schools.html"
+    context_object_name = "schools"
+    queryset = School.objects.filter(is_active=True)
+
+
+class SchoolDetailView(DetailView):
+    model = School
+    template_name = "gym/school_detail.html"
+    context_object_name = "school"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        school = self.object
+        ctx['members'] = school.members.filter(is_active=True)
+        ctx['volunteers'] = school.volunteers.filter(is_active=True)
+        ctx['disciples'] = school.disciples.all()
+        ctx['activities'] = school.activities.all()
+        return ctx
+
+
+class RoleDashboardMixin(LoginRequiredMixin, UserPassesTestMixin):
+    allowed_roles = ()
+
+    def test_func(self):
+        u = self.request.user
+        return u.is_authenticated and (u.is_superadmin() or u.role in self.allowed_roles)
+
+    def handle_no_permission(self):
+        from django.shortcuts import redirect
+        return redirect('dashboard:redirect')
+
+
+class InfoDashboardView(RoleDashboardMixin, TemplateView):
+    template_name = "gym/dashboards/info_dashboard.html"
+    allowed_roles = ('gym_info',)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['recent_items'] = FeedItem.objects.filter(scope=FeedItem.Scope.GYM).order_by('-created_at')[:20]
+        return ctx
+
+
+class FinanceDashboardView(RoleDashboardMixin, TemplateView):
+    template_name = "gym/dashboards/finance_dashboard.html"
+    allowed_roles = ('gym_finance',)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        month_start = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        qs = FinanceRecord.objects.filter(date__gte=month_start)
+        income_qs = qs.filter(type=FinanceRecord.Type.INCOME).values('currency').annotate(total=Sum('amount'))
+        expense_qs = qs.filter(type=FinanceRecord.Type.EXPENSE).values('currency').annotate(total=Sum('amount'))
+        ctx['finance_breakdown'] = currency_breakdown(income_qs, expense_qs)
+        ctx['recent_records'] = FinanceRecord.objects.all()[:20]
+        return ctx
+
+
+class SchoolsDashboardView(RoleDashboardMixin, TemplateView):
+    template_name = "gym/dashboards/schools_dashboard.html"
+    allowed_roles = ('gym_schools',)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['schools'] = School.objects.filter(is_active=True)
+        ctx['total_members'] = SchoolMember.objects.filter(is_active=True).count()
+        ctx['total_volunteers'] = SchoolVolunteer.objects.filter(is_active=True).count()
+        ctx['total_disciples'] = SchoolDisciple.objects.count()
+        return ctx
+
+
+class MediaDashboardView(RoleDashboardMixin, TemplateView):
+    template_name = "gym/dashboards/media_dashboard.html"
+    allowed_roles = ('gym_media',)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['recent_activities'] = SchoolActivity.objects.all()[:20]
+        return ctx
+
+
+class ConsoleAccessMixin(LoginRequiredMixin, UserPassesTestMixin):
+    ministry_roles = ('gym_info', 'gym_finance', 'gym_schools', 'gym_media')
+
+    def test_func(self):
+        u = self.request.user
+        return u.is_authenticated and (u.is_superadmin() or u.role in self.ministry_roles)
+
+    def handle_no_permission(self):
+        from django.shortcuts import redirect
+        return redirect('dashboard:redirect')
+
+
+class GymConsoleView(ConsoleAccessMixin, TemplateView):
+    template_name = "gym/console.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['school_count'] = School.objects.filter(is_active=True).count()
+        ctx['total_members'] = SchoolMember.objects.filter(is_active=True).count()
+        ctx['total_volunteers'] = SchoolVolunteer.objects.filter(is_active=True).count()
+        ctx['total_disciples'] = SchoolDisciple.objects.count()
+        income_qs = FinanceRecord.objects.filter(type=FinanceRecord.Type.INCOME).values('currency').annotate(total=Sum('amount'))
+        expense_qs = FinanceRecord.objects.filter(type=FinanceRecord.Type.EXPENSE).values('currency').annotate(total=Sum('amount'))
+        ctx['finance_breakdown'] = currency_breakdown(income_qs, expense_qs)
+        ctx['audit_logs'] = AuditLog.objects.filter(scope='gym')[:25]
+        return ctx
+
+
+def _gym_info_or_super(user):
+    return user.is_authenticated and (user.is_superadmin() or user.role == 'gym_info')
+
+
+def _gym_finance_or_super(user):
+    return user.is_authenticated and (user.is_superadmin() or user.role == 'gym_finance')
+
+
+def _gym_schools_or_super(user):
+    return user.is_authenticated and (user.is_superadmin() or user.role == 'gym_schools')
+
+
+def _gym_media_or_super(user):
+    return user.is_authenticated and (user.is_superadmin() or user.role == 'gym_media')
+
+
+@login_required
+@user_passes_test(_gym_info_or_super, login_url='/dashboard/redirect/')
+def feed_item_create(request):
+    if request.method == 'POST':
+        form = FeedItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.scope = FeedItem.Scope.GYM
+            obj.created_by = request.user
+            obj.save()
+            messages.success(request, f"'{obj.title}' added to the GYM feed.")
+            return redirect('gym:info_dashboard')
+    else:
+        form = FeedItemForm(initial={'published_at': tz.now(), 'expires_at': tz.now() + tz.timedelta(days=14)})
+    return render(request, 'gym/feed_item_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_gym_schools_or_super, login_url='/dashboard/redirect/')
+def school_create(request):
+    if request.method == 'POST':
+        form = SchoolForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "School added.")
+            return redirect('gym:schools_dashboard')
+    else:
+        form = SchoolForm()
+    return render(request, 'gym/school_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_gym_schools_or_super, login_url='/dashboard/redirect/')
+def school_member_create(request):
+    if request.method == 'POST':
+        form = SchoolMemberForm(request.POST)
+        if form.is_valid():
+            obj = form.save()
+            messages.success(request, f"{obj.full_name} added at {obj.school.name}.")
+            return redirect('gym:schools_dashboard')
+    else:
+        form = SchoolMemberForm()
+    return render(request, 'gym/school_member_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_gym_schools_or_super, login_url='/dashboard/redirect/')
+def school_volunteer_create(request):
+    if request.method == 'POST':
+        form = SchoolVolunteerForm(request.POST)
+        if form.is_valid():
+            obj = form.save()
+            messages.success(request, f"{obj.full_name} added as a volunteer at {obj.school.name}.")
+            return redirect('gym:schools_dashboard')
+    else:
+        form = SchoolVolunteerForm()
+    return render(request, 'gym/school_volunteer_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_gym_schools_or_super, login_url='/dashboard/redirect/')
+def school_disciple_create(request):
+    if request.method == 'POST':
+        form = SchoolDiscipleForm(request.POST)
+        if form.is_valid():
+            obj = form.save()
+            messages.success(request, f"{obj.full_name} enrolled as a disciple at {obj.school.name}.")
+            return redirect('gym:schools_dashboard')
+    else:
+        form = SchoolDiscipleForm()
+    return render(request, 'gym/school_disciple_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_gym_media_or_super, login_url='/dashboard/redirect/')
+def school_activity_create(request):
+    if request.method == 'POST':
+        form = SchoolActivityForm(request.POST, request.FILES)
+        if form.is_valid():
+            obj = form.save()
+            messages.success(request, f"'{obj.title}' recorded at {obj.school.name}.")
+            return redirect('gym:media_dashboard')
+    else:
+        form = SchoolActivityForm()
+    return render(request, 'gym/school_activity_form.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_gym_finance_or_super, login_url='/dashboard/redirect/')
+def finance_create(request):
+    if request.method == 'POST':
+        form = GymFinanceForm(request.POST)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.recorded_by = request.user
+            obj.save()
+            messages.success(request, f"{obj.get_type_display()} of {obj.amount} {obj.currency} recorded.")
+            return redirect('gym:finance_dashboard')
+    else:
+        form = GymFinanceForm()
+    return render(request, 'gym/finance_form.html', {'form': form})

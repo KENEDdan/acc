@@ -1,0 +1,25 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Add Volunteer{% endblock %}
+{% block dash_eyebrow %}Global Youth Ministry{% endblock %}
+{% block dash_title %}Add Volunteer{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+<form method="post">
+    {% csrf_token %}
+    <div class="form-section">
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.school %}
+            {% include "partials/form_field.html" with field=form.full_name %}
+            {% include "partials/form_field.html" with field=form.contact_phone %}
+            {% include "partials/form_field.html" with field=form.role_description %}
+            {% include "partials/form_field.html" with field=form.joined_date %}
+            {% include "partials/form_field.html" with field=form.is_active %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Add Volunteer</button>
+        <a class="btn-secondary" href="{% url 'gym:schools_dashboard' %}">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

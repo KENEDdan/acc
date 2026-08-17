@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Global Youth Ministry{% endblock %}
+{% block content %}
+<h1>Global Youth Ministry (GYM)</h1>
+<p style="color:var(--acc-muted);">Active in {{ school_count }} school{{ school_count|pluralize }}</p>
+<div class="feed-grid">
+    {% for item in feed_items %}
+    <a class="feed-card" href="{{ item.get_absolute_url }}">
+        {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }}">{% else %}<div class="no-image"></div>{% endif %}
+        <div class="feed-card-body">
+            <span class="feed-type-tag">{{ item.get_item_type_display }}</span>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.summary }}</p>
+        </div>
+    </a>
+    {% empty %}
+    <p>No GYM news yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

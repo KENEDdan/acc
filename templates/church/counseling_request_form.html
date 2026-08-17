@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Book Counseling{% endblock %}
+{% block content %}
+<div style="max-width:520px; margin: 30px auto;">
+    <span class="eyebrow">Apostolic Campus Church</span>
+    <h1>Book a Counseling Session</h1>
+    <p style="color:var(--acc-muted); font-size:.9rem;">
+        You don't have to be a registered member to book. Our Membership team will confirm a date and let you know your place in the queue.
+        Our counseling sessions are done by the lead Pastor every Mondays and Wednesdays from 8:00 AM - 4:00 PM
+    </p>
+    <form method="post" style="margin-top:20px;">
+        {% csrf_token %}
+        {% for field in form %}
+        <p>
+            <label style="display:block; font-size:.82rem; font-weight:600; margin-bottom:4px;">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small style="color:var(--acc-muted); display:block; margin-top:3px;">{{ field.help_text }}</small>{% endif %}
+            {% if field.errors %}<div style="color:#B5453D; font-size:.8rem; margin-top:3px;">{{ field.errors }}</div>{% endif %}
+        </p>
+        {% endfor %}
+        <button type="submit" class="btn-primary" style="width:100%; margin-top:10px;">Request Session</button>
+    </form>
+</div>
+{% endblock %}

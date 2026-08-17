@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Search Results{% endblock %}
+{% block content %}
+<h1>Search results for "{{ query }}"</h1>
+<div class="feed-grid">
+    {% for item in results %}
+    <a class="feed-card" href="{{ item.get_absolute_url }}">
+        {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }}">{% else %}<div class="no-image"></div>{% endif %}
+        <div class="feed-card-body">
+            <span class="feed-type-tag">{{ item.get_scope_display }}</span>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.summary }}</p>
+        </div>
+    </a>
+    {% empty %}
+    <p>No results found.</p>
+    {% endfor %}
+</div>
+{% endblock %}

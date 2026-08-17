@@ -1,0 +1,28 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Add Feed Item{% endblock %}
+{% block dash_eyebrow %}Global Youth Ministry{% endblock %}
+{% block dash_title %}Add Feed Item{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-section">
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.item_type %}
+            {% include "partials/form_field.html" with field=form.event_date %}
+            {% include "partials/form_field.html" with field=form.title wide=True %}
+            {% include "partials/form_field.html" with field=form.summary wide=True %}
+            {% include "partials/form_field.html" with field=form.body wide=True %}
+            {% include "partials/form_field.html" with field=form.image wide=True %}
+            {% include "partials/form_field.html" with field=form.published_at %}
+            {% include "partials/form_field.html" with field=form.expires_at %}
+            {% include "partials/form_field.html" with field=form.is_active %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Publish to GYM Feed</button>
+        <a class="btn-secondary" href="{% url 'gym:info_dashboard' %}">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

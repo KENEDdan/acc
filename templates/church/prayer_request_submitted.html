@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Prayer Request Submitted{% endblock %}
+{% block content %}
+<div style="max-width:480px; margin: 40px auto; background:var(--acc-card-bg); border:1px solid var(--acc-border); border-radius:12px; padding:28px; text-align:center;">
+    <h2 style="margin-top:0;">Thank You</h2>
+    <p style="color:var(--acc-muted);">Your prayer request has been received. Our Membership team will review it, and any response will be shared back with you.</p>
+
+    {% if not prayer_request.submitted_by_user %}
+    <div style="margin-top:16px; background:var(--acc-bg); border:1px solid var(--acc-border); border-radius:8px; padding:16px;">
+        <p style="margin:0 0 6px 0; font-size:.85rem; color:var(--acc-muted);">Save this reference code to check for a response later:</p>
+        <p style="font-family:monospace; font-size:1.3rem; font-weight:700; margin:0;">{{ prayer_request.reference_code }}</p>
+    </div>
+    {% else %}
+    <p style="color:var(--acc-muted); font-size:.85rem;">You can check for a response any time from your dashboard.</p>
+    {% endif %}
+
+    <a class="btn-secondary" href="{% url 'core:home' %}" style="margin-top:18px; display:inline-block;">Back to Home</a>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Add Sermon/Teaching{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Add Sermon or Teaching{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+<form method="post">
+    {% csrf_token %}
+    <div class="form-section">
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.media_type %}
+            {% include "partials/form_field.html" with field=form.speaker %}
+            {% include "partials/form_field.html" with field=form.title wide=True %}
+            {% include "partials/form_field.html" with field=form.youtube_url wide=True %}
+            {% include "partials/form_field.html" with field=form.description wide=True %}
+            {% include "partials/form_field.html" with field=form.is_active %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Publish</button>
+        <a class="btn-secondary" href="{% url 'church:media_dashboard' %}">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

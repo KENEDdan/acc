@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ activity.name }}{% endblock %}
+{% block content %}
+<a href="{% url 'church:activities' %}">&larr; Back to Activities</a>
+<h1>{{ activity.name }}</h1>
+<p style="color:var(--acc-muted);">{{ activity.schedule_text }}{% if activity.led_by %} &bull; Led by {{ activity.led_by }}{% endif %}</p>
+{% if activity.image %}<img src="{{ activity.image.url }}" alt="{{ activity.name }}" style="max-width:100%; border-radius:10px; margin: 12px 0;">{% endif %}
+<div>{{ activity.description|linebreaks }}</div>
+{% endblock %}

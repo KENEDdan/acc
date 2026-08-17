@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Library{% endblock %}
+{% block content %}
+<h1>Library</h1>
+<p style="color:var(--acc-muted);">Free books and resources — read online or download, no payment required.</p>
+<div class="book-grid">
+    {% for resource in resources %}
+    <div class="book-card">
+        {% if resource.cover_image %}
+        <img class="book-cover" src="{{ resource.cover_image.url }}" alt="{{ resource.title }}">
+        {% else %}
+        <div class="book-cover-fallback">{{ resource.title|truncatechars:40 }}</div>
+        {% endif %}
+        <div class="book-body">
+            <span class="book-free-badge">Free</span>
+            <h3 class="book-title">{{ resource.title }}</h3>
+            {% if resource.author %}<p class="book-author">by {{ resource.author }}</p>{% endif %}
+            <p class="book-desc">{{ resource.description|truncatewords:20 }}</p>
+            {% if resource.file %}
+            <a class="btn-primary" href="{{ resource.file.url }}" target="_blank" download>Download</a>
+            {% elif resource.external_url %}
+            <a class="btn-primary" href="{{ resource.external_url }}" target="_blank">Read Online</a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <p>No books added yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Member Verification{% endblock %}
+{% block content %}
+<div style="max-width:420px; margin: 40px auto; background:var(--acc-card-bg); border:1px solid var(--acc-border); border-radius:12px; padding:28px; text-align:center;">
+    {% if member.photo %}
+    <img src="{{ member.photo.url }}" alt="{{ member.full_name }}" style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin-bottom:14px; border:3px solid var(--acc-lime-green);">
+    {% endif %}
+    <h2 style="margin:0 0 4px;">{{ member.full_name }}</h2>
+    <p style="color:var(--acc-muted); margin:0 0 16px;">{{ member.member_id }}</p>
+    {% if member.is_active %}
+    <span class="badge badge-active" style="font-size:.9rem; padding:8px 18px;">Active Member</span>
+    {% else %}
+    <span class="badge badge-inactive" style="font-size:.9rem; padding:8px 18px;">Inactive</span>
+    {% endif %}
+    <div style="margin-top:20px; text-align:left; font-size:.88rem; color:var(--acc-text);">
+        <p><strong>Membership Type:</strong> {{ member.get_membership_type_display }}</p>
+        <p><strong>Branch:</strong> {{ member.branch.name|default:"—" }}</p>
+        <p><strong>Member Since:</strong> {{ member.registered_at|date:"F Y" }}</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Apostolic Campus Church — Home{% endblock %}
+{% block content %}
+
+{% if live_item %}
+<div class="live-banner">
+    <span>&#128227; LIVE NOW: {{ live_item.title }}</span>
+    <a href="{{ live_item.get_absolute_url }}" style="color:white; text-decoration:underline; font-weight:600;">Watch &rarr;</a>
+</div>
+{% endif %}
+
+<section class="hero">
+    <span class="eyebrow">Apostolic Campus Church</span>
+    <h1 class="hero-title">One Church. Three Works of Grace.</h1>
+    <p class="hero-sub">Worship together at Apostolic Campus Church, raise up a generation through the Global Youth Ministry, and stand with the vulnerable through the Apostles' Feet Foundation &mdash; all in one home.</p>
+
+    <div class="arc-frame">
+        <div class="triptych">
+            <a class="triptych-card" href="{% url 'church:home' %}">
+                <div class="triptych-crest">&#10013;</div>
+                <h3>The Church</h3>
+                <p>Sunday worship, discipleship, and daily life together at Apostolic Campus Church.</p>
+                <span class="visit-link">Visit the Church &rarr;</span>
+            </a>
+            <a class="triptych-card" href="{% url 'gym:home' %}">
+                <div class="triptych-crest">&#127891;</div>
+                <h3>Global Youth Ministry</h3>
+                <p>Raising up students and teachers across our partner schools.</p>
+                <span class="visit-link">Visit GYM &rarr;</span>
+            </a>
+            <a class="triptych-card" href="{% url 'aff:home' %}">
+                <div class="triptych-crest">&#129309;</div>
+                <h3>Apostles' Feet Foundation</h3>
+                <p>Standing with members facing financial hardship, in the spirit of Acts 4:34&ndash;35.</p>
+                <span class="visit-link">Visit AFF &rarr;</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section-block">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Happening Now</span>
+            <h2>Latest Across the Family</h2>
+        </div>
+    </div>
+
+    {% if feed_items %}
+    <div class="feed-featured">
+        {% with featured=feed_items.0 %}
+        <a class="feed-featured-main" href="{{ featured.get_absolute_url }}">
+            {% if featured.image %}
+            <img src="{{ featured.image.url }}" alt="{{ featured.title }}">
+            {% else %}
+            <div class="no-image"></div>
+            {% endif %}
+            <div class="feed-featured-body">
+                <span class="feed-type-tag">{{ featured.get_scope_display }} &bull; {{ featured.get_item_type_display }}</span>
+                <h2>{{ featured.title }}</h2>
+                <p>{{ featured.summary }}</p>
+            </div>
+        </a>
+        {% endwith %}
+
+        <div class="feed-list">
+            {% for item in feed_items|slice:"1:6" %}
+            <a class="feed-list-item" href="{{ item.get_absolute_url }}">
+                {% if item.image %}
+                <img class="thumb" src="{{ item.image.url }}" alt="{{ item.title }}">
+                {% else %}
+                <div class="thumb-fallback"></div>
+                {% endif %}
+                <div>
+                    <h4>{{ item.title }}</h4>
+                    <p>{{ item.get_scope_display }} &bull; {{ item.get_item_type_display }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <p style="color:var(--acc-muted); margin-top:16px;">No news feed items yet. Check back soon.</p>
+    {% endif %}
+</section>
+
+<section class="section-block">
+    <div class="witness-band">
+        <div class="witness-stat"><div class="witness-num">{{ member_count }}</div><div class="witness-label">Members</div></div>
+        <div class="witness-stat"><div class="witness-num">{{ branch_count }}</div><div class="witness-label">Branches</div></div>
+        <div class="witness-stat"><div class="witness-num">{{ worker_count }}</div><div class="witness-label">Workers</div></div>
+        <div class="witness-stat"><div class="witness-num">{{ disciple_count }}</div><div class="witness-label">Disciples</div></div>
+    </div>
+</section>
+{% endblock %}

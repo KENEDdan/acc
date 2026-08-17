@@ -1,0 +1,52 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Counseling Requests{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Counseling Sessions{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'church:counseling_queue' %}">Today's Queue</a>
+{% endblock %}
+{% block dash_content %}
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>New Requests &mdash; Need Scheduling</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Name</th><th>Phone</th><th>Topic</th><th>Preferred Date</th><th></th></tr></thead>
+        <tbody>
+        {% for s in requested %}
+            <tr>
+                <td>{{ s.full_name }}</td>
+                <td>{{ s.contact_phone }}</td>
+                <td>{{ s.topic|default:"-" }}</td>
+                <td>{{ s.preferred_date }}</td>
+                <td><a class="btn-primary" href="{% url 'church:counseling_schedule' s.pk %}">Schedule</a></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="dash-empty">No new requests.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Upcoming (Scheduled)</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Name</th><th>Phone</th><th>Date</th><th>Time</th></tr></thead>
+        <tbody>
+        {% for s in upcoming %}
+            <tr>
+                <td>{{ s.full_name }}</td>
+                <td>{{ s.contact_phone }}</td>
+                <td>{{ s.scheduled_slot|date:"l, M d" }}</td>
+                <td>{{ s.scheduled_slot|date:"g:i A" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="dash-empty">Nothing scheduled yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

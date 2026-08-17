@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Church (ACC){% endblock %}
+{% block content %}
+{% if live_service %}
+<div class="live-banner">
+    <span>&#128227; LIVE NOW: {{ live_service.title }} on {{ live_service.get_platform_display }}</span>
+    <a href="{{ live_service.stream_url }}" style="color:white; text-decoration:underline;" target="_blank" rel="noopener">Watch</a>
+</div>
+{% endif %}
+<h1>Church (ACC)</h1>
+<p style="color:var(--acc-muted);">Grace and Truth</p>
+
+<div class="feed-grid">
+    {% for item in feed_items %}
+    <a class="feed-card" href="{{ item.get_absolute_url }}">
+        {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }}">{% else %}<div class="no-image"></div>{% endif %}
+        <div class="feed-card-body">
+            <span class="feed-type-tag">{{ item.get_item_type_display }}</span>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.summary }}</p>
+        </div>
+    </a>
+    {% empty %}
+    <p>No church news yet.</p>
+    {% endfor %}
+</div>
+
+<h2 style="margin-top:32px;">Upcoming Activities</h2>
+<div class="feed-grid">
+    {% for activity in upcoming_activities %}
+    <a class="feed-card" href="{% url 'church:activity_detail' activity.pk %}">
+        {% if activity.image %}<img src="{{ activity.image.url }}" alt="{{ activity.name }}">{% else %}<div class="no-image"></div>{% endif %}
+        <div class="feed-card-body">
+            <h3>{{ activity.name }}</h3>
+            <p>{{ activity.schedule_text }}</p>
+        </div>
+    </a>
+    {% empty %}
+    <p>No activities added yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

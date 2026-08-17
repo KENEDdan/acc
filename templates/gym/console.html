@@ -1,0 +1,55 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}GYM Console{% endblock %}
+{% block dash_eyebrow %}Global Youth Ministry{% endblock %}
+{% block dash_title %}Management Console{% endblock %}
+{% block dash_actions %}
+<a class="btn-secondary" href="{% url 'gym:home' %}" target="_blank">View Public Page</a>
+{% endblock %}
+{% block dash_content %}
+<div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-num">{{ school_count }}</div><div class="kpi-label">Schools</div></div>
+    <div class="kpi-card"><div class="kpi-num">{{ total_members }}</div><div class="kpi-label">Members</div></div>
+    <div class="kpi-card"><div class="kpi-num">{{ total_volunteers }}</div><div class="kpi-label">Volunteers</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ total_disciples }}</div><div class="kpi-label">Disciples</div></div>
+    {% for row in finance_breakdown %}
+    <div class="kpi-card accent"><div class="kpi-num">{{ row.balance }}</div><div class="kpi-label">Balance ({{ row.currency }})</div></div>
+    {% endfor %}
+</div>
+
+<h2 class="dash-subhead">Management Areas</h2>
+<div class="feed-grid">
+    <a class="feed-card" href="{% url 'gym:info_dashboard' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Content</span><h3>Information &amp; Feed</h3><p>GYM news, updates, and stories.</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'gym:finance_dashboard' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Finance</span><h3>Finance Records</h3><p>Income and expense entries, by currency.</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'gym:schools_dashboard' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Schools</span><h3>Schools</h3><p>Members, volunteers, and disciples per school.</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'gym:media_dashboard' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Media</span><h3>Activities &amp; Media</h3><p>School activity records.</p></div>
+    </a>
+</div>
+
+<h2 class="dash-subhead">Audit Log</h2>
+<div class="dash-table-wrap">
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>When</th><th>Action</th><th>Record</th><th>By</th></tr></thead>
+        <tbody>
+        {% for log in audit_logs %}
+            <tr>
+                <td style="white-space:nowrap;">{{ log.created_at|date:"M d, Y H:i" }}</td>
+                <td><span class="badge badge-active">{{ log.get_action_display }}</span></td>
+                <td>{{ log.model_name }}: {{ log.object_repr }}</td>
+                <td>{{ log.actor.get_full_name|default:log.actor.username|default:"—" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="dash-empty">No activity recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

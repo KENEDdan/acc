@@ -1,0 +1,29 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Add Branch{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Add a New Branch{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+<form method="post">
+    {% csrf_token %}
+    <div class="form-section">
+        <h3 class="form-section-title">Branch Details</h3>
+        <p class="form-section-hint">This information is shown on the public Branches page.</p>
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.name %}
+            {% include "partials/form_field.html" with field=form.location %}
+            {% include "partials/form_field.html" with field=form.leader_name %}
+            {% include "partials/form_field.html" with field=form.capacity %}
+            {% include "partials/form_field.html" with field=form.disciples_count %}
+            {% include "partials/form_field.html" with field=form.established_date %}
+            {% include "partials/form_field.html" with field=form.contact_phone %}
+            {% include "partials/form_field.html" with field=form.history wide=True %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Save Branch</button>
+        <a class="btn-secondary" href="{% url 'church:branches' %}">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

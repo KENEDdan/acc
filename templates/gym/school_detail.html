@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ school.name }}{% endblock %}
+{% block content %}
+<a href="{% url 'gym:schools' %}">&larr; Back to Schools</a>
+<h1>{{ school.name }}</h1>
+<p style="color:var(--acc-muted);">{{ school.location }}</p>
+<div class="stats-bar">
+    <div class="stat"><div class="num">{{ members.count }}</div><div class="label">Members</div></div>
+    <div class="stat"><div class="num">{{ volunteers.count }}</div><div class="label">Volunteers</div></div>
+    <div class="stat"><div class="num">{{ disciples.count }}</div><div class="label">Disciples</div></div>
+    <div class="stat"><div class="num">{{ activities.count }}</div><div class="label">Activities</div></div>
+</div>
+<h2>Activities</h2>
+<div class="feed-grid">
+    {% for a in activities %}
+    <div class="feed-card">
+        {% if a.image %}<img src="{{ a.image.url }}" alt="{{ a.title }}">{% else %}<div class="no-image"></div>{% endif %}
+        <div class="feed-card-body"><h3>{{ a.title }}</h3><p>{{ a.description }}</p></div>
+    </div>
+    {% empty %}<p>No activities recorded yet.</p>{% endfor %}
+</div>
+{% endblock %}

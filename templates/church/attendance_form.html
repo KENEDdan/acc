@@ -1,0 +1,23 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Record Attendance{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Record Attendance{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+<form method="post">
+    {% csrf_token %}
+    <div class="form-section">
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.date %}
+            {% include "partials/form_field.html" with field=form.branch %}
+            {% include "partials/form_field.html" with field=form.count %}
+            {% include "partials/form_field.html" with field=form.notes wide=True %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Save Attendance</button>
+        <a class="btn-secondary" href="{% url 'church:attendance_reports' %}">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

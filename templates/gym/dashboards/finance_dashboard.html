@@ -1,0 +1,40 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}GYM Finance Dashboard{% endblock %}
+{% block dash_eyebrow %}Global Youth Ministry{% endblock %}
+{% block dash_title %}Finance Dashboard{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'gym:finance_create' %}">+ Record Entry</a>
+{% endblock %}
+{% block dash_content %}
+<div class="kpi-grid">
+    {% for row in finance_breakdown %}
+    <div class="kpi-card"><div class="kpi-num">{{ row.income }}</div><div class="kpi-label">Income This Month ({{ row.currency }})</div></div>
+    <div class="kpi-card alert"><div class="kpi-num">{{ row.expense }}</div><div class="kpi-label">Expense This Month ({{ row.currency }})</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ row.balance }}</div><div class="kpi-label">Balance ({{ row.currency }})</div></div>
+    {% empty %}
+    <p style="color:var(--acc-muted);">No GYM finance records yet.</p>
+    {% endfor %}
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Recent Records</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>School</th></tr></thead>
+        <tbody>
+        {% for r in recent_records %}
+            <tr>
+                <td>{{ r.date }}</td>
+                <td>{{ r.get_type_display }}</td>
+                <td>{{ r.income_category|default:r.expense_category }}</td>
+                <td>{{ r.amount }} {{ r.currency }}</td>
+                <td>{{ r.school|default:"-" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="dash-empty">No records yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

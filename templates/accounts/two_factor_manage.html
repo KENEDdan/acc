@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Two-Factor Authentication{% endblock %}
+{% block content %}
+<div style="max-width:460px; margin: 40px auto; background:var(--acc-card-bg); border:1px solid var(--acc-border); border-radius:12px; padding:28px;">
+    <h2 style="margin-top:0;">Two-Factor Authentication</h2>
+
+    {% if messages %}
+    {% for message in messages %}
+    <p style="{% if message.tags == 'error' %}color:#B5453D;{% else %}color:var(--acc-lime-green);{% endif %} font-size:.85rem;">{{ message }}</p>
+    {% endfor %}
+    {% endif %}
+
+    {% if user.two_factor_enabled %}
+    <p style="color:var(--acc-muted); font-size:.9rem;">
+        <span class="badge badge-active">Enabled</span> Two-factor authentication is protecting your account.
+    </p>
+
+    <form method="post" action="{% url 'accounts:two_factor_regenerate_backup_codes' %}" style="margin-top:16px;">
+        {% csrf_token %}
+        <button type="submit" class="btn-secondary" style="width:100%;">Generate New Backup Codes</button>
+    </form>
+    <p style="color:var(--acc-muted); font-size:.78rem; margin-top:4px;">This replaces your existing backup codes - old ones stop working.</p>
+
+    <form method="post" action="{% url 'accounts:two_factor_disable' %}" style="margin-top:18px; border-top:1px solid var(--acc-border); padding-top:16px;">
+        {% csrf_token %}
+        <label style="display:block; font-size:.82rem; font-weight:600; margin-bottom:4px;">Confirm your password to disable</label>
+        <input type="password" name="password" style="width:100%;">
+        <button type="submit" class="btn-secondary" style="width:100%; margin-top:8px; color:#B5453D;">Disable Two-Factor Authentication</button>
+    </form>
+    {% else %}
+    <p style="color:var(--acc-muted); font-size:.9rem;">
+        <span class="badge badge-pending">Not Enabled</span> Add an authenticator app for extra protection on your account.
+    </p>
+    <a class="btn-primary" href="{% url 'accounts:two_factor_setup' %}" style="width:100%; display:block; text-align:center; margin-top:14px;">Set Up Two-Factor Authentication</a>
+    {% endif %}
+</div>
+{% endblock %}

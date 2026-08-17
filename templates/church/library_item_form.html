@@ -1,0 +1,28 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Add Book{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Add a Book to the Library{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+<div class="form-top-note">Books are shown publicly with their cover and description, and can be downloaded for free — no payment or login required.</div>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-section">
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.title %}
+            {% include "partials/form_field.html" with field=form.author %}
+            {% include "partials/form_field.html" with field=form.category %}
+            {% include "partials/form_field.html" with field=form.is_active %}
+            {% include "partials/form_field.html" with field=form.cover_image wide=True %}
+            {% include "partials/form_field.html" with field=form.description wide=True %}
+            {% include "partials/form_field.html" with field=form.file wide=True %}
+            {% include "partials/form_field.html" with field=form.external_url wide=True %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Add to Library</button>
+        <a class="btn-secondary" href="{% url 'church:media_dashboard' %}">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

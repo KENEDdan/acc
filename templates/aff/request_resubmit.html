@@ -1,0 +1,67 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Update Request{% endblock %}
+{% block dash_eyebrow %}Apostles' Feet Foundation{% endblock %}
+{% block dash_title %}Update &amp; Resubmit Request{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+<div class="form-top-note">
+    <strong>The superadmin asked for more information:</strong><br>
+    {{ req.review_notes }}
+</div>
+<form method="post">
+    {% csrf_token %}
+
+    <div class="form-section">
+        <h3 class="form-section-title">A. Personal Information</h3>
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.full_name %}
+            {% include "partials/form_field.html" with field=form.request_date %}
+            {% include "partials/form_field.html" with field=form.tel %}
+            {% include "partials/form_field.html" with field=form.sex %}
+            {% include "partials/form_field.html" with field=form.marital_status %}
+            {% include "partials/form_field.html" with field=form.occupation %}
+            {% include "partials/form_field.html" with field=form.residential_address wide=True %}
+            {% include "partials/form_field.html" with field=form.family wide=True %}
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="form-section-title">B. Membership Information</h3>
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.membership_type %}
+            {% include "partials/form_field.html" with field=form.membership_duration %}
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="form-section-title">C. Spiritual Information</h3>
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.received_salvation %}
+            {% include "partials/form_field.html" with field=form.salvation_when_where %}
+            {% include "partials/form_field.html" with field=form.salvation_experience wide=True %}
+            {% include "partials/form_field.html" with field=form.gone_through_discipleship %}
+            {% include "partials/form_field.html" with field=form.department_serving %}
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="form-section-title">D. The Need</h3>
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.need_category %}
+            {% include "partials/form_field.html" with field=form.other_need_note %}
+            {% include "partials/form_field.html" with field=form.amount_have %}
+            {% include "partials/form_field.html" with field=form.amount_requested %}
+            {% include "partials/form_field.html" with field=form.currency %}
+            {% include "partials/form_field.html" with field=form.help_directed_to %}
+            {% include "partials/form_field.html" with field=form.help_directed_other %}
+            {% include "partials/form_field.html" with field=form.how_church_can_help wide=True %}
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Resubmit for Review</button>
+        <a class="btn-secondary" href="{% url 'aff:request_detail' req.pk %}">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

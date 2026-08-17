@@ -1,0 +1,34 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Media Dashboard{% endblock %}
+{% block dash_eyebrow %}Church (ACC){% endblock %}
+{% block dash_title %}Live &amp; Media Dashboard{% endblock %}
+{% block dash_actions %}
+<a class="btn-secondary" href="{% url 'church:live_start' %}">+ Go Live</a>
+{% if live_service %}<a class="btn-secondary" href="{% url 'church:live_end' %}">End Live</a>{% endif %}
+<a class="btn-primary" href="{% url 'church:media_item_create' %}">+ Add Sermon/Teaching</a>
+<a class="btn-primary" href="{% url 'church:library_item_create' %}">+ Add Book</a>
+{% endblock %}
+{% block dash_content %}
+<div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-num">{{ sermon_count }}</div><div class="kpi-label">Sermons</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ teaching_count }}</div><div class="kpi-label">Teachings</div></div>
+</div>
+{% if live_service %}
+<div class="live-banner"><span>&#128227; Currently LIVE on {{ live_service.get_platform_display }}: {{ live_service.title }}</span></div>
+{% endif %}
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Recent Uploads</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Title</th><th>Type</th><th>Speaker</th></tr></thead>
+        <tbody>
+        {% for m in recent_media %}
+            <tr><td>{{ m.title }}</td><td>{{ m.get_media_type_display }}</td><td>{{ m.speaker|default:"—" }}</td></tr>
+        {% empty %}
+            <tr><td colspan="3" class="dash-empty">Nothing uploaded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Prayer Request{% endblock %}
+{% block dash_eyebrow %}{{ prayer_request.reference_code }}{% endblock %}
+{% block dash_title %}{{ prayer_request.submitted_by_name|default:"Anonymous" }}{% endblock %}
+{% block dash_actions %}
+{% if is_staff %}
+{% if prayer_request.status == 'submitted' %}
+<form method="post" action="{% url 'church:prayer_request_forward' prayer_request.pk %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn-primary">Forward to Superadmin</button>
+</form>
+{% endif %}
+{% if is_superadmin_user %}
+<a class="btn-primary" href="{% url 'church:prayer_request_respond' prayer_request.pk %}">{% if prayer_request.response_text %}Update Response{% else %}Write Response{% endif %}</a>
+{% endif %}
+<a class="btn-secondary" href="{% url 'church:prayer_requests_list' %}">Back to List</a>
+{% else %}
+<a class="btn-secondary" href="{% url 'dashboard:member' %}">Back to My Dashboard</a>
+{% endif %}
+{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+    <div class="form-section">
+        <h3 class="form-section-title">Status</h3>
+        <p><span class="badge badge-{{ prayer_request.status }}">{{ prayer_request.get_status_display }}</span>
+        {% if prayer_request.is_urgent %} <span class="badge badge-declined">Urgent</span>{% endif %}</p>
+        <p class="form-section-hint">Submitted {{ prayer_request.created_at|date:"M d, Y H:i" }}
+        {% if prayer_request.contact_phone %} &middot; {{ prayer_request.contact_phone }}{% endif %}</p>
+    </div>
+
+    <div class="form-section">
+        <h3 class="form-section-title">Request</h3>
+        <p style="white-space:pre-wrap;">{{ prayer_request.request_text }}</p>
+    </div>
+
+    {% if prayer_request.response_text %}
+    <div class="form-section">
+        <h3 class="form-section-title">Response</h3>
+        <div class="form-top-note" style="margin-bottom:0;">
+            {{ prayer_request.response_text }}
+        </div>
+        {% if prayer_request.responded_by %}
+        <p class="form-section-hint" style="margin-top:10px;">
+            By {{ prayer_request.responded_by.get_full_name|default:prayer_request.responded_by.username }}
+            on {{ prayer_request.responded_at|date:"M d, Y H:i" }}
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

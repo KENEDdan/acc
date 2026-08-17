@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dash-shell">
+    <a href="{% url 'core:home' %}" class="dash-back-link">&larr; Back to site</a>
+    <div class="dash-topbar">
+        <div>
+            <span class="eyebrow">{% block dash_eyebrow %}Dashboard{% endblock %}</span>
+            <h1 class="dash-title">{% block dash_title %}{% endblock %}</h1>
+        </div>
+        <div class="dash-topbar-actions">
+            {% block dash_actions %}{% endblock %}
+        </div>
+    </div>
+    {% block dash_content %}{% endblock %}
+</div>
+{% endblock %}

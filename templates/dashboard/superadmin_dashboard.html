@@ -1,0 +1,179 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Superadmin Dashboard{% endblock %}
+{% block dash_eyebrow %}Superadmin{% endblock %}
+{% block dash_title %}Full Platform Overview{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'dashboard:accounts' %}">Manage Admin Accounts</a>
+{% endblock %}
+{% block dash_content %}
+
+<div class="feed-grid">
+    <a class="feed-card" href="{% url 'church:console' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>Church (ACC)</h3><p>Open the church management console &rarr;</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'gym:console' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>Global Youth Ministry</h3><p>Open the GYM management console &rarr;</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'dashboard:accounts' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>Admin Accounts</h3><p>Create and view admin accounts for every dashboard &rarr;</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'aff:console' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>Apostles' Feet Foundation</h3><p>Open the AFF management console &rarr;</p></div>
+    </a>
+</div>
+
+<h2 class="dash-subhead">Church (ACC)</h2>
+<div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-num">{{ member_count }}</div><div class="kpi-label">Members</div></div>
+    <div class="kpi-card"><div class="kpi-num">{{ branch_count }}</div><div class="kpi-label">Branches</div></div>
+    <div class="kpi-card"><div class="kpi-num">{{ pastor_elder_count }}</div><div class="kpi-label">Pastors &amp; Elders</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ discipleship_count }}</div><div class="kpi-label">Ongoing Disciples</div></div>
+    {% for row in church_breakdown %}
+    <div class="kpi-card"><div class="kpi-num">{{ row.income }}</div><div class="kpi-label">Income ({{ row.currency }})</div></div>
+    <div class="kpi-card alert"><div class="kpi-num">{{ row.expense }}</div><div class="kpi-label">Expense ({{ row.currency }})</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ row.balance }}</div><div class="kpi-label">Balance ({{ row.currency }})</div></div>
+    {% endfor %}
+</div>
+
+<h2 class="dash-subhead">Global Youth Ministry</h2>
+<div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-num">{{ school_count }}</div><div class="kpi-label">Schools</div></div>
+    <div class="kpi-card"><div class="kpi-num">{{ gym_member_count }}</div><div class="kpi-label">Members</div></div>
+    <div class="kpi-card"><div class="kpi-num">{{ gym_volunteer_count }}</div><div class="kpi-label">Volunteers</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ gym_disciple_count }}</div><div class="kpi-label">Disciples</div></div>
+    {% for row in gym_breakdown %}
+    <div class="kpi-card"><div class="kpi-num">{{ row.income }}</div><div class="kpi-label">Income ({{ row.currency }})</div></div>
+    <div class="kpi-card alert"><div class="kpi-num">{{ row.expense }}</div><div class="kpi-label">Expense ({{ row.currency }})</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ row.balance }}</div><div class="kpi-label">Balance ({{ row.currency }})</div></div>
+    {% endfor %}
+</div>
+
+<h2 class="dash-subhead">Apostles' Feet Foundation</h2>
+<div class="kpi-grid">
+    <div class="kpi-card alert"><div class="kpi-num">{{ aff_pending_requests.count }}</div><div class="kpi-label">Pending Requests</div></div>
+    {% for row in aff_breakdown %}
+    <div class="kpi-card"><div class="kpi-num">{{ row.income }}</div><div class="kpi-label">Income ({{ row.currency }})</div></div>
+    <div class="kpi-card alert"><div class="kpi-num">{{ row.expense }}</div><div class="kpi-label">Disbursed ({{ row.currency }})</div></div>
+    <div class="kpi-card accent"><div class="kpi-num">{{ row.balance }}</div><div class="kpi-label">Balance ({{ row.currency }})</div></div>
+    {% endfor %}
+</div>
+
+{% if aff_pending_requests %}
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>AFF Requests Awaiting Your Approval</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Name</th><th>Need</th><th>Amount</th><th>Submitted</th><th></th></tr></thead>
+        <tbody>
+        {% for r in aff_pending_requests %}
+            <tr>
+                <td>{{ r.full_name }}</td>
+                <td>{{ r.get_need_category_display }}</td>
+                <td>{{ r.amount_requested }} {{ r.currency }}</td>
+                <td>{{ r.created_at|date:"M d, Y" }}</td>
+                <td><a class="btn-secondary" href="{% url 'aff:request_review' r.pk %}">Review</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endif %}
+
+{% if forwarded_prayer_requests %}
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Prayer Requests Awaiting Your Response</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Reference</th><th>From</th><th>Forwarded</th><th></th></tr></thead>
+        <tbody>
+        {% for pr in forwarded_prayer_requests %}
+            <tr>
+                <td>{{ pr.reference_code }}{% if pr.is_urgent %} <span class="badge badge-declined">Urgent</span>{% endif %}</td>
+                <td>{{ pr.submitted_by_name|default:"Anonymous" }}</td>
+                <td>{{ pr.created_at|date:"M d, Y" }}</td>
+                <td><a class="btn-primary" href="{% url 'church:prayer_request_respond' pr.pk %}">Respond</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head">
+        <h3>Today's Counseling Queue</h3>
+        <a class="btn-primary" href="{% url 'church:counseling_queue' %}">Open Queue &rarr;</a>
+    </div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <tbody>
+        <tr>
+            <td>
+                {% if todays_counseling_current %}
+                Now seeing: <strong>{{ todays_counseling_current.full_name }}</strong>
+                {% else %}
+                No one currently being seen.
+                {% endif %}
+            </td>
+            <td>{{ todays_counseling_waiting }} waiting in queue</td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head">
+        <h3>Recent Attendance</h3>
+        <a class="btn-secondary" href="{% url 'church:attendance_reports' %}">Full Reports &rarr;</a>
+    </div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Date</th><th>Branch</th><th>Count</th></tr></thead>
+        <tbody>
+        {% for a in recent_attendance %}
+            <tr><td>{{ a.date }}</td><td>{{ a.branch.name|default:"All Branches" }}</td><td>{{ a.count }}</td></tr>
+        {% empty %}
+            <tr><td colspan="3" class="dash-empty">No attendance recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Leaders &amp; Admins</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Name</th><th>Role</th></tr></thead>
+        <tbody>
+        {% for leader in leaders %}
+            <tr><td>{{ leader.get_full_name|default:leader.username }}</td><td>{{ leader.get_role_display }}</td></tr>
+        {% empty %}
+            <tr><td colspan="2" class="dash-empty">No admins created yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Recent Notifications</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <tbody>
+        {% for n in notifications %}
+            <tr>
+                <td style="width:70%;"><a href="/notifications/{{ n.id }}/read/">{{ n.message }}</a>{% if not n.is_read %} <span class="badge badge-pending">New</span>{% endif %}</td>
+                <td style="color:var(--acc-muted); font-size:.8rem;">{{ n.created_at|date:"M d, Y H:i" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td class="dash-empty">No notifications yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Apostles' Feet Foundation{% endblock %}
+{% block content %}
+<h1>Apostles' Feet Foundation (AFF)</h1>
+<p style="color:var(--acc-muted);">"Neither was there any among them that lacked..." &mdash; Acts 4:34-35</p>
+<div class="feed-grid">
+    {% for item in feed_items %}
+    <a class="feed-card" href="{{ item.get_absolute_url }}">
+        {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }}">{% else %}<div class="no-image"></div>{% endif %}
+        <div class="feed-card-body">
+            <span class="feed-type-tag">{{ item.get_item_type_display }}</span>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.summary }}</p>
+        </div>
+    </a>
+    {% empty %}
+    <p>No AFF news yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

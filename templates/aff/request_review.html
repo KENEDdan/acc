@@ -1,0 +1,47 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Review Request{% endblock %}
+{% block dash_eyebrow %}Apostles' Feet Foundation{% endblock %}
+{% block dash_title %}Review Assistance Request{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+    <div class="form-section">
+        <h3 class="form-section-title">{{ req.full_name }}</h3>
+        <p class="form-section-hint">Submitted {{ req.created_at|date:"M d, Y" }} by {{ req.filled_by.get_full_name|default:req.filled_by.username|default:"—" }}</p>
+        <div class="form-grid">
+            <div class="form-field"><label>Need</label><div>{{ req.get_need_category_display }}{% if req.other_need_note %} &mdash; {{ req.other_need_note }}{% endif %}</div></div>
+            <div class="form-field"><label>Amount Requested</label><div>{{ req.amount_requested }} {{ req.currency }}</div></div>
+            <div class="form-field"><label>Amount They Have</label><div>{{ req.amount_have }} {{ req.currency }}</div></div>
+            <div class="form-field"><label>Directed To</label><div>{{ req.get_help_directed_to_display }}{% if req.help_directed_other %} &mdash; {{ req.help_directed_other }}{% endif %}</div></div>
+            <div class="form-field full"><label>How the church can help</label><div>{{ req.how_church_can_help }}</div></div>
+            <div class="form-field"><label>Membership</label><div>{{ req.get_membership_type_display }}, {{ req.membership_duration|default:"—" }}</div></div>
+            <div class="form-field"><label>Discipleship class</label><div>{{ req.gone_through_discipleship|yesno:"Yes,No" }} &mdash; serves in {{ req.department_serving|default:"—" }}</div></div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="form-section-title">Your Decision</h3>
+        <p class="form-section-hint">
+            Your notes below are shown to the AFF finance admin who submitted this request —
+            they're <strong>required</strong> when you decline or ask for more information.
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="form-field full">
+                    <label>{{ form.decision.label }}</label>
+                    <div class="form-radio-group">
+                        {% for radio in form.decision %}
+                        <label>{{ radio.tag }} {{ radio.choice_label }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% include "partials/form_field.html" with field=form.review_notes wide=True %}
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Save Decision</button>
+                <a class="btn-secondary" href="{% url 'dashboard:superadmin' %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

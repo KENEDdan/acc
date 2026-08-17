@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<h1>{{ page_title }}</h1>
+<div style="display:flex; flex-direction:column; gap:16px; margin-top:16px;">
+    {% for media in media_items %}
+    <div class="feed-card" style="flex-direction:row; align-items:center;">
+        <div style="flex:1; padding:14px;">
+            <h3 style="margin:0 0 6px;">{{ media.title }}</h3>
+            {% if media.speaker %}<p style="margin:0 0 6px; color:var(--acc-muted);">{{ media.speaker }}</p>{% endif %}
+            <p style="margin:0 0 8px;">{{ media.description }}</p>
+            <a class="btn-primary" href="{{ media.youtube_url }}" target="_blank" rel="noopener">Watch on YouTube</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>Nothing uploaded yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

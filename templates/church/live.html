@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Live{% endblock %}
+{% block content %}
+<div class="section-head">
+    <div>
+        <span class="eyebrow">Apostolic Campus Church</span>
+        <h1>Live</h1>
+    </div>
+</div>
+
+{% if live_service %}
+<div style="background:var(--acc-card-bg); border:1px solid var(--acc-border); border-radius:12px; padding:24px; margin-top:16px;">
+    <span class="badge badge-active">LIVE NOW</span>
+    <h2 style="margin-top:10px;">{{ live_service.title }}</h2>
+    <p style="color:var(--acc-muted);">
+        Streaming on {{ live_service.get_platform_display }}{% if live_service.started_at %} since {{ live_service.started_at|date:"M d, Y H:i" }}{% endif %}
+    </p>
+    <a class="btn-primary" href="{{ live_service.stream_url }}" target="_blank" rel="noopener" style="margin-top:12px; display:inline-block;">Watch on {{ live_service.get_platform_display }} &rarr;</a>
+</div>
+{% else %}
+<div style="background:var(--acc-card-bg); border:1px solid var(--acc-border); border-radius:12px; padding:24px; margin-top:16px; text-align:center;">
+    <p style="color:var(--acc-muted); margin:0;">We're not live right now. Check back Sunday at 9:00 AM, or browse our past sermons in the meantime.</p>
+    <a class="btn-secondary" href="{% url 'church:sermons' %}" style="margin-top:12px; display:inline-block;">Browse Sermons</a>
+</div>
+{% endif %}
+{% endblock %}

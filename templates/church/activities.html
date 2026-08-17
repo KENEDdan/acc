@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Church Activities{% endblock %}
+{% block content %}
+<h1>Church Activities</h1>
+<div class="feed-grid">
+    {% for activity in activities %}
+    <a class="feed-card" href="{% url 'church:activity_detail' activity.pk %}">
+        {% if activity.image %}<img src="{{ activity.image.url }}" alt="{{ activity.name }}">{% else %}<div class="no-image"></div>{% endif %}
+        <div class="feed-card-body">
+            <span class="feed-type-tag">{{ activity.get_category_display }}</span>
+            <h3>{{ activity.name }}</h3>
+            <p>{{ activity.schedule_text }}</p>
+        </div>
+    </a>
+    {% empty %}
+    <p>No activities added yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

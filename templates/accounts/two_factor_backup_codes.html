@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Your Backup Codes{% endblock %}
+{% block content %}
+<div style="max-width:460px; margin: 40px auto; background:var(--acc-card-bg); border:1px solid var(--acc-border); border-radius:12px; padding:28px;">
+    <h2 style="margin-top:0;">Save Your Backup Codes</h2>
+    <p style="color:var(--acc-muted); font-size:.85rem;">
+        Each code works once and lets you sign in if you lose access to your authenticator app.
+        Write these down or save them somewhere safe &mdash; <strong>they will not be shown again.</strong>
+    </p>
+
+    <div style="font-family:monospace; font-size:1.05rem; background:var(--acc-bg); border:1px solid var(--acc-border); border-radius:8px; padding:16px; line-height:2;">
+        {% for code in codes %}{{ code }}<br>{% endfor %}
+    </div>
+
+    <a class="btn-primary" href="{% url 'accounts:two_factor_manage' %}" style="width:100%; display:block; text-align:center; margin-top:16px;">I've Saved These &mdash; Continue</a>
+</div>
+{% endblock %}
