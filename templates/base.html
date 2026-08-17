@@ -552,10 +552,19 @@ function getCookie(name) {
 const csrftoken = getCookie('csrftoken');
 
 /* Language selection, powered by Google Translate */
+function clearGoogTransCookie() {
+    // Google's widget can write this cookie host-only or scoped to the domain (with or
+    // without a leading dot) depending on how it was set — clear every variant, or a stale
+    // one keeps winning and the page never actually switches back to English.
+    const host = location.hostname;
+    const expired = 'expires=Thu, 01 Jan 1970 00:00:00 UTC';
+    document.cookie = `googtrans=; ${expired}; path=/`;
+    document.cookie = `googtrans=; ${expired}; path=/; domain=${host}`;
+    document.cookie = `googtrans=; ${expired}; path=/; domain=.${host}`;
+}
 function setSiteLanguage(lang) {
-    if (lang === 'en') {
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
-    } else {
+    clearGoogTransCookie();
+    if (lang !== 'en') {
         document.cookie = 'googtrans=/en/' + lang + '; path=/';
     }
     localStorage.setItem('acc-lang', lang);
@@ -570,6 +579,7 @@ function googleTranslateElementInit() {
 }
 (function () {
     const saved = localStorage.getItem('acc-lang') || 'en';
+    if (saved === 'en') clearGoogTransCookie(); // guards against a stray cookie surviving from an earlier session
     const sel = document.getElementById('siteLangSelect');
     if (sel) sel.value = saved;
     document.documentElement.setAttribute('lang', saved);
