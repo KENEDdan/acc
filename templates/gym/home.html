@@ -1,8 +1,14 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Global Youth Ministry{% endblock %}
 {% block content %}
-<h1>Global Youth Ministry (GYM)</h1>
-<p style="color:var(--acc-muted);">Active in {{ school_count }} school{{ school_count|pluralize }}</p>
+<div class="about-hero">
+    <img class="about-hero-logo" src="{% static 'img/gym_logo.jpg' %}" alt="Global Youth Ministry logo">
+    <div class="about-hero-text">
+        <h1>Global Youth Ministry (GYM)</h1>
+        <p style="color:var(--acc-muted); margin:0;">Active in {{ school_count }} school{{ school_count|pluralize }}</p>
+    </div>
+</div>
 <div class="feed-grid">
     {% for item in feed_items %}
     <a class="feed-card" href="{{ item.get_absolute_url }}">

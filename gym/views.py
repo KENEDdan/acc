@@ -4,6 +4,7 @@ from django.db.models import Sum
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth, TruncYear
 from django.utils import timezone
 import csv
+import re
 
 from newsfeed.models import FeedItem, FeedItemManager
 from finance.utils import currency_breakdown, period_breakdown
@@ -29,12 +30,36 @@ class GymHomeView(TemplateView):
         return ctx
 
 
+def _parse_about_content(content):
+    """Splits plain-text About Us content into heading/paragraph blocks so short
+    section-title lines (e.g. "Vision", "Objectives") can render as real headings
+    instead of getting swallowed into the following paragraph's line break."""
+    blocks = []
+    for raw_block in re.split(r'\n\s*\n', content.strip()):
+        raw_block = raw_block.strip()
+        if not raw_block:
+            continue
+        lines = raw_block.split('\n', 1)
+        first_line = lines[0].strip()
+        rest = lines[1].strip() if len(lines) > 1 else ''
+        looks_like_heading = len(first_line) <= 60 and not first_line.endswith(('.', '!', '?', ':'))
+        if looks_like_heading and (rest or len(lines) == 1):
+            blocks.append({'type': 'heading', 'text': first_line})
+            if rest:
+                blocks.append({'type': 'paragraph', 'text': rest})
+        else:
+            blocks.append({'type': 'paragraph', 'text': raw_block})
+    return blocks
+
+
 class GymAboutUsView(TemplateView):
     template_name = "gym/about.html"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['about'] = AboutUs.objects.first()
+        about = AboutUs.objects.first()
+        ctx['about'] = about
+        ctx['about_blocks'] = _parse_about_content(about.content) if about else []
         return ctx
 
 

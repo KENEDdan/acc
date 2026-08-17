@@ -368,6 +368,25 @@
     .form-field textarea { resize: vertical; min-height: 80px; }
     .form-field .help-text { font-size: .76rem; color: var(--acc-muted); margin-top: 4px; }
     .form-field .field-error { font-size: .78rem; color: #B5453D; margin-top: 4px; }
+
+    /* Ministry "About Us" pages */
+    .about-hero { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-bottom: 4px; }
+    .about-hero-logo {
+        width: 96px; height: 96px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+        border: 3px solid var(--acc-card-bg); box-shadow: 0 6px 20px rgba(23,35,26,.20);
+    }
+    .about-hero-text h1 { margin-bottom: 4px; }
+    .about-article {
+        background: var(--acc-card-bg); border: 1px solid var(--acc-border); border-radius: 14px;
+        padding: 30px clamp(20px, 5vw, 46px); margin-top: 26px; max-width: 780px;
+    }
+    .about-article h3 {
+        font-family: 'Fraunces', serif; color: var(--acc-accent-text); font-size: 1.15rem;
+        margin: 1.6em 0 .5em;
+    }
+    .about-article h3:first-child { margin-top: 0; }
+    .about-article p { line-height: 1.75; color: var(--acc-text); margin: 0 0 1.1em; }
+    .about-article p:last-child { margin-bottom: 0; }
     .form-actions { display: flex; gap: 12px; margin-top: 4px; }
     .form-top-note { background: rgba(124,140,62,.08); border: 1px solid rgba(124,140,62,.25); border-radius: 10px; padding: 12px 16px; font-size: .85rem; color: var(--acc-text); margin-bottom: 22px; }
     .form-radio-group { display: flex; gap: 18px; align-items: center; padding-top: 4px; }
