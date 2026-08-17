@@ -43,7 +43,7 @@
                 <td style="white-space:nowrap;">{{ log.created_at|date:"M d, Y H:i" }}</td>
                 <td><span class="badge badge-active">{{ log.get_action_display }}</span></td>
                 <td>{{ log.model_name }}: {{ log.object_repr }}</td>
-                <td>{{ log.actor.get_full_name|default:log.actor.username|default:"—" }}</td>
+                <td>{% if log.actor %}{{ log.actor.get_full_name|default:log.actor.username }}{% else %}—{% endif %}</td>
             </tr>
         {% empty %}
             <tr><td colspan="4" class="dash-empty">No activity recorded yet.</td></tr>

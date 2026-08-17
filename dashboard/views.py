@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .forms import AdminAccountCreateForm
+from .forms import AdminAccountCreateForm, AdminAccountEditForm
 from audit.services import log_action
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse, NoReverseMatch
 from django.db.models import Sum
 from django.utils import timezone
@@ -100,6 +100,44 @@ def create_account(request):
     else:
         form = AdminAccountCreateForm()
     return render(request, 'dashboard/account_create.html', {'form': form})
+
+
+@login_required
+@user_passes_test(_is_superadmin, login_url='/dashboard/redirect/')
+def account_detail(request, pk):
+    account = get_object_or_404(User.objects.exclude(role=User.Role.MEMBER), pk=pk)
+    return render(request, 'dashboard/account_detail.html', {'account': account})
+
+
+@login_required
+@user_passes_test(_is_superadmin, login_url='/dashboard/redirect/')
+def account_edit(request, pk):
+    account = get_object_or_404(User.objects.exclude(role=User.Role.MEMBER), pk=pk)
+    if request.method == 'POST':
+        form = AdminAccountEditForm(request.POST, instance=account)
+        if form.is_valid():
+            obj = form.save()
+            log_action(request.user, 'system', 'User', obj, action='update', details=f"Role: {obj.get_role_display()}")
+            messages.success(request, f"Account '{obj.username}' updated.")
+            return redirect('dashboard:account_detail', pk=obj.pk)
+    else:
+        form = AdminAccountEditForm(instance=account)
+    return render(request, 'dashboard/account_edit.html', {'form': form, 'account': account})
+
+
+@login_required
+@user_passes_test(_is_superadmin, login_url='/dashboard/redirect/')
+def account_toggle_active(request, pk):
+    account = get_object_or_404(User.objects.exclude(role=User.Role.MEMBER), pk=pk)
+    if request.method == 'POST':
+        account.is_active = not account.is_active
+        account.save(update_fields=['is_active'])
+        log_action(
+            request.user, 'system', 'User', account,
+            action='update', details=('Activated' if account.is_active else 'Deactivated'),
+        )
+        messages.success(request, f"Account '{account.username}' {'activated' if account.is_active else 'deactivated'}.")
+    return redirect('dashboard:account_detail', pk=account.pk)
 
 
 @login_required

@@ -1,0 +1,37 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}{{ account.username }}{% endblock %}
+{% block dash_eyebrow %}Superadmin{% endblock %}
+{% block dash_title %}{{ account.username }}{% endblock %}
+{% block dash_actions %}
+<a class="btn-secondary" href="{% url 'dashboard:accounts' %}">Back to Accounts</a>
+<a class="btn-primary" href="{% url 'dashboard:account_edit' account.pk %}">Edit</a>
+{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+    <div class="form-section">
+        <div class="form-grid">
+            <div class="form-field"><label>Username</label><div>{{ account.username }}</div></div>
+            <div class="form-field"><label>Full Name</label><div>{{ account.get_full_name|default:"—" }}</div></div>
+            <div class="form-field"><label>Role</label><div><span class="badge badge-active">{{ account.get_role_display }}</span></div></div>
+            <div class="form-field"><label>Email</label><div>{{ account.email|default:"—" }}</div></div>
+            <div class="form-field"><label>Phone</label><div>{{ account.phone_number|default:"—" }}</div></div>
+            <div class="form-field"><label>Status</label><div>{% if account.is_active %}<span class="badge badge-active">Active</span>{% else %}<span class="badge badge-inactive">Inactive</span>{% endif %}</div></div>
+            <div class="form-field"><label>Two-Factor Authentication</label><div>{{ account.two_factor_enabled|yesno:"Enabled,Not set up" }}</div></div>
+            <div class="form-field"><label>Must Change Password</label><div>{{ account.must_change_password|yesno:"Yes,No" }}</div></div>
+            <div class="form-field"><label>Date Joined</label><div>{{ account.date_joined|date:"M d, Y" }}</div></div>
+            <div class="form-field"><label>Last Login</label><div>{{ account.last_login|date:"M d, Y g:i A"|default:"Never" }}</div></div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <form method="post" action="{% url 'dashboard:account_toggle_active' account.pk %}" onsubmit="return confirm('{% if account.is_active %}Deactivate{% else %}Activate{% endif %} this account?');">
+            {% csrf_token %}
+            {% if account.is_active %}
+            <button type="submit" class="btn-secondary">Deactivate Account</button>
+            {% else %}
+            <button type="submit" class="btn-primary">Activate Account</button>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

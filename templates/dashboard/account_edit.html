@@ -1,0 +1,21 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Edit Account{% endblock %}
+{% block dash_eyebrow %}Superadmin{% endblock %}
+{% block dash_title %}Edit {{ account.username }}{% endblock %}
+{% block dash_content %}
+<div class="dash-form-card">
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <p>
+            <label style="display:block; font-size:.82rem; font-weight:600; margin-bottom:4px;">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small style="color:var(--acc-muted); display:block; margin-top:3px;">{{ field.help_text }}</small>{% endif %}
+            {% if field.errors %}<div style="color:#B5453D; font-size:.8rem; margin-top:3px;">{{ field.errors }}</div>{% endif %}
+        </p>
+        {% endfor %}
+        <button type="submit" class="btn-primary" style="width:100%; margin-top:10px;">Save Changes</button>
+        <a class="btn-secondary" style="width:100%; margin-top:8px; text-align:center;" href="{% url 'dashboard:account_detail' account.pk %}">Cancel</a>
+    </form>
+</div>
+{% endblock %}

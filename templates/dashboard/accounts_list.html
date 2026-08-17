@@ -9,7 +9,7 @@
 <div class="dash-table-wrap">
     <div class="dash-table-scroll">
     <table class="dash-table">
-        <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Email</th><th>Status</th></tr></thead>
+        <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Email</th><th>Status</th><th></th></tr></thead>
         <tbody>
         {% for a in accounts %}
             <tr>
@@ -18,9 +18,10 @@
                 <td><span class="badge badge-active">{{ a.get_role_display }}</span></td>
                 <td>{{ a.email|default:"—" }}</td>
                 <td>{% if a.is_active %}<span class="badge badge-active">Active</span>{% else %}<span class="badge badge-inactive">Inactive</span>{% endif %}</td>
+                <td><a class="btn-secondary" href="{% url 'dashboard:account_detail' a.pk %}">View</a></td>
             </tr>
         {% empty %}
-            <tr><td colspan="5" class="dash-empty">No admin accounts created yet.</td></tr>
+            <tr><td colspan="6" class="dash-empty">No admin accounts created yet.</td></tr>
         {% endfor %}
         </tbody>
     </table>

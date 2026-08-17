@@ -9,3 +9,12 @@ class AdminAccountCreateForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ('username', 'first_name', 'last_name', 'email', 'phone_number', 'role')
+
+
+class AdminAccountEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email', 'phone_number', 'role', 'is_active')
+        widgets = {
+            'phone_number': forms.TextInput(attrs={'type': 'tel'}),
+        }

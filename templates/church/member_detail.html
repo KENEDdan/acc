@@ -30,7 +30,7 @@
             <div class="form-field"><label>Branch</label><div>{{ member.branch.name|default:"-" }}</div></div>
             <div class="form-field"><label>Previously a Member Elsewhere</label><div>{{ member.is_old_member|yesno:"Yes,No" }}</div></div>
             <div class="form-field"><label>Prior Duration</label><div>{{ member.prior_duration|default:"-" }}</div></div>
-            <div class="form-field"><label>Registered</label><div>{{ member.registered_at|date:"M d, Y" }} by {{ member.registered_by.get_full_name|default:member.registered_by.username|default:"-" }}</div></div>
+            <div class="form-field"><label>Registered</label><div>{{ member.registered_at|date:"M d, Y" }} by {% if member.registered_by %}{{ member.registered_by.get_full_name|default:member.registered_by.username }}{% else %}-{% endif %}</div></div>
             <div class="form-field"><label>Login Account</label><div>{% if member.user %}Active ({{ member.user.username }}){% else %}None{% endif %}</div></div>
         </div>
     </div>

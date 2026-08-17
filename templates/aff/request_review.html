@@ -6,7 +6,7 @@
 <div class="form-page">
     <div class="form-section">
         <h3 class="form-section-title">{{ req.full_name }}</h3>
-        <p class="form-section-hint">Submitted {{ req.created_at|date:"M d, Y" }} by {{ req.filled_by.get_full_name|default:req.filled_by.username|default:"—" }}</p>
+        <p class="form-section-hint">Submitted {{ req.created_at|date:"M d, Y" }} by {% if req.filled_by %}{{ req.filled_by.get_full_name|default:req.filled_by.username }}{% else %}—{% endif %}</p>
         <div class="form-grid">
             <div class="form-field"><label>Need</label><div>{{ req.get_need_category_display }}{% if req.other_need_note %} &mdash; {{ req.other_need_note }}{% endif %}</div></div>
             <div class="form-field"><label>Amount Requested</label><div>{{ req.amount_requested }} {{ req.currency }}</div></div>
