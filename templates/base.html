@@ -89,6 +89,14 @@
         display: flex; align-items: center; justify-content: center;
     }
     .lang-select { background: rgba(255,255,255,.15); color: white; border: none; border-radius: 6px; padding: 6px 6px; font-size: .82rem; }
+
+    /* Google Translate widget: keep it invisible/out of the way — our own .lang-select drives it */
+    #google_translate_element { display: none !important; }
+    .goog-te-banner-frame.skiptranslate { display: none !important; }
+    body { top: 0 !important; }
+    .goog-te-gadget-icon { display: none !important; }
+    .goog-tooltip, .goog-tooltip:hover { display: none !important; }
+    .goog-text-highlight { background: none !important; box-shadow: none !important; }
     .strip { background: var(--acc-lime-green); color: white; padding: 4px 20px; font-size: .78rem; text-align: center; letter-spacing: .04em; }
 
     /* Drawer */
@@ -383,6 +391,7 @@
 {% block extra_head %}{% endblock %}
 </head>
 <body data-theme="light">
+<div id="google_translate_element"></div>
 
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <div class="drawer" id="drawer">
@@ -455,14 +464,10 @@
         <button type="submit" aria-label="Search">&#128269;</button>
     </form>
     <div class="header-actions">
-        <form method="post" action="{% url 'core:set_language' %}" id="langForm">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{{ request.path }}">
-            <select name="language" class="lang-select" onchange="document.getElementById('langForm').submit()">
-                <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>ENG</option>
-                <option value="ar" {% if LANGUAGE_CODE == 'ar' %}selected{% endif %}>عربي</option>
-            </select>
-        </form>
+        <select id="siteLangSelect" class="lang-select" onchange="setSiteLanguage(this.value)" title="Translate this page" aria-label="Translate this page">
+            <option value="en">ENG</option>
+            <option value="ar">عربي</option>
+        </select>
         <button class="icon-btn" id="themeToggle" title="Toggle dark/light mode" aria-label="Toggle theme">&#9788;</button>
         {% if user.is_authenticated %}
         <button class="icon-btn" id="bellBtn" title="Notifications" aria-label="Notifications">
@@ -546,6 +551,31 @@ function getCookie(name) {
 }
 const csrftoken = getCookie('csrftoken');
 
+/* Language selection, powered by Google Translate */
+function setSiteLanguage(lang) {
+    if (lang === 'en') {
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+    } else {
+        document.cookie = 'googtrans=/en/' + lang + '; path=/';
+    }
+    localStorage.setItem('acc-lang', lang);
+    location.reload();
+}
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,ar',
+        autoDisplay: false,
+    }, 'google_translate_element');
+}
+(function () {
+    const saved = localStorage.getItem('acc-lang') || 'en';
+    const sel = document.getElementById('siteLangSelect');
+    if (sel) sel.value = saved;
+    document.documentElement.setAttribute('lang', saved);
+    document.documentElement.setAttribute('dir', saved === 'ar' ? 'rtl' : 'ltr');
+})();
+
 const drawer = document.getElementById('drawer');
 const overlay = document.getElementById('drawerOverlay');
 document.getElementById('openDrawer').onclick = () => { drawer.classList.add('open'); overlay.classList.add('open'); };
@@ -605,6 +635,7 @@ async function sendAiMessage() {
 document.getElementById('aiSend').onclick = sendAiMessage;
 aiInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendAiMessage(); });
 </script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
 {% block extra_scripts %}{% endblock %}
 </body>
 </html>
