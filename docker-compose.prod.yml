@@ -3,25 +3,12 @@
 #
 # Usage: docker compose -f docker-compose.prod.yml up -d --build
 #
-# If you're pointing at a managed Postgres/Redis instead (recommended once you
-# outgrow a single box), just remove the db/redis services below and set
-# DB_HOST/REDIS_URL in .env to the managed endpoints.
+# Postgres is a managed provider (DigitalOcean/RDS/Render/Supabase/etc), not a
+# service here — point DB_HOST/DB_PORT/DB_SSLMODE in .env at it, and rely on
+# the provider's own automated backups rather than scripts/backup_db.sh (that
+# script is still there for an occasional manual/ad-hoc snapshot, just not the
+# primary backup strategy anymore).
 services:
-  db:
-    image: postgres:15-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - acc_pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -35,10 +22,7 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.prod
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - redis
     ports:
       - "8000:8000"
     volumes:
@@ -52,10 +36,7 @@ services:
       DJANGO_SETTINGS_MODULE: config.settings.prod
     command: celery -A config worker --loglevel=info
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - redis
     volumes:
       - acc_media:/app/media
 
@@ -67,34 +48,8 @@ services:
       DJANGO_SETTINGS_MODULE: config.settings.prod
     command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
-
-  # Nightly pg_dump to a local volume — see scripts/backup_db.sh for the
-  # restore command and for shipping these off-box (S3/etc), which you should
-  # also set up since this alone doesn't protect against losing the whole host.
-  backup:
-    image: prodrigestivill/postgres-backup-local:15-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_HOST: db
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      SCHEDULE: "@daily"
-      BACKUP_KEEP_DAYS: 7
-      BACKUP_KEEP_WEEKS: 4
-      BACKUP_KEEP_MONTHS: 6
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - acc_db_backups:/backups
+      - redis
 
 volumes:
-  acc_pgdata:
   acc_redisdata:
   acc_media:
-  acc_db_backups:

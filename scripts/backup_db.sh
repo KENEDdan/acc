@@ -1,16 +1,11 @@
 #!/bin/sh
-# Manual/cron-triggered Postgres backup, for when you're not using the
-# `backup` service in docker-compose.prod.yml (e.g. a managed DB, or you
-# just want an ad-hoc dump). Requires DB_NAME/DB_USER/DB_PASSWORD/DB_HOST/
-# DB_PORT in the environment — `set -a; . ./.env; set +a` before running
-# this if you're calling it outside of docker compose.
+# Manual/cron-triggered Postgres backup. The managed DB provider's own
+# automated backups are the primary strategy now (see .env.example /
+# DB_HOST) — this is for an occasional ad-hoc snapshot, e.g. before a risky
+# migration. Requires DB_NAME/DB_USER/DB_PASSWORD/DB_HOST/DB_PORT in the
+# environment — `set -a; . ./.env; set +a` before running this.
 #
 # Usage: ./scripts/backup_db.sh [output-directory]
-#
-# IMPORTANT: this alone does not protect you from losing the whole host —
-# copy BACKUP_DIR off-box regularly (e.g. `aws s3 sync`, rclone, rsync to
-# another machine). A backup that only exists on the server it's backing up
-# is not a backup.
 set -e
 
 BACKUP_DIR="${1:-./backups}"

@@ -65,6 +65,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
+# Most managed Postgres providers (DigitalOcean, RDS, Render, Supabase, etc.) require
+# SSL and will refuse plain connections. 'prefer' (the default) uses SSL when
+# available without breaking local dev, which has none — set DB_SSLMODE=require (or
+# verify-full, with DB_SSLROOTCERT pointing at the provider's CA bundle) once you're
+# pointed at the managed instance.
+_db_options = {'sslmode': config('DB_SSLMODE', default='prefer')}
+_db_sslrootcert = config('DB_SSLROOTCERT', default='')
+if _db_sslrootcert:
+    _db_options['sslrootcert'] = _db_sslrootcert
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -73,6 +83,7 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT'),
+        'OPTIONS': _db_options,
     }
 }
 
