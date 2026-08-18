@@ -110,6 +110,16 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
+# Shared across processes (unlike the default in-memory cache), which the rate
+# limiting on the public forms/AI assistant needs to actually be enforced
+# correctly once there's more than one gunicorn worker.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': config('REDIS_URL'),
+    }
+}
+
 LOGIN_URL = '/portal/'
 LOGIN_REDIRECT_URL = '/dashboard/redirect/'
 

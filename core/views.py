@@ -7,6 +7,8 @@ from django.contrib.auth import get_user_model
 import json
 import re
 
+from django_ratelimit.decorators import ratelimit
+
 from newsfeed.models import FeedItem, FeedItemManager
 from church.models import Member, Branch, DiscipleshipEnrollment, LiveService, PastorElder
 from gym.models import SchoolDisciple, School
@@ -147,6 +149,7 @@ DEFAULT_REPLY = (
 
 
 @require_POST
+@ratelimit(key='ip', rate='30/m', block=True)
 def ai_assistant_reply(request):
     try:
         data = json.loads(request.body or "{}")

@@ -7,6 +7,8 @@ from django.core.paginator import Paginator
 import csv
 import datetime
 
+from django_ratelimit.decorators import ratelimit
+
 from newsfeed.models import FeedItem, FeedItemManager
 from finance.utils import currency_breakdown, period_breakdown
 from audit.models import AuditLog
@@ -420,6 +422,7 @@ def finance_report_export(request):
 
     # ---------- Giving / Donations ----------
 
+@ratelimit(key='ip', rate='10/h', method='POST', block=True)
 def giving_create(request):
     """Public 'Give' page — works for anonymous visitors and, if logged in, registered members alike.
     Shows the active bank/MoMo accounts and lets the giver log what they sent, for Finance to confirm."""
@@ -790,6 +793,7 @@ def member_reset_password(request):
 
     # ---------- Prayer Requests ----------
 
+@ratelimit(key='ip', rate='5/h', method='POST', block=True)
 def prayer_request_create(request):
     """Public — works for anonymous visitors and, if logged in, registered members alike."""
     if request.method == 'POST':
@@ -934,6 +938,7 @@ def attendance_delete(request, pk):
 
     # ---------- Counseling Sessions ----------
 
+@ratelimit(key='ip', rate='5/h', method='POST', block=True)
 def counseling_request_create(request):
     """Public — works for anonymous visitors and, if logged in, registered members alike."""
     if request.method == 'POST':
