@@ -87,6 +87,34 @@ class CounselingSessionModelTests(TestCase):
                 )
 
 
+class LibraryResourceUploadValidationTests(TestCase):
+    def test_disallowed_file_extension_rejected(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from church.forms import LibraryResourceForm
+
+        bad_file = SimpleUploadedFile('malware.exe', b'fake exe content', content_type='application/octet-stream')
+        form = LibraryResourceForm(data={'title': 'Test Book'}, files={'file': bad_file})
+        self.assertFalse(form.is_valid())
+        self.assertIn('file', form.errors)
+
+    def test_allowed_file_extension_accepted(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from church.forms import LibraryResourceForm
+
+        good_file = SimpleUploadedFile('book.pdf', b'%PDF-1.4 fake pdf content', content_type='application/pdf')
+        form = LibraryResourceForm(data={'title': 'Test Book'}, files={'file': good_file})
+        self.assertTrue(form.is_valid())
+
+    def test_oversized_file_rejected(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from church.forms import LibraryResourceForm
+
+        big_file = SimpleUploadedFile('book.pdf', b'x' * (26 * 1024 * 1024), content_type='application/pdf')
+        form = LibraryResourceForm(data={'title': 'Test Book'}, files={'file': big_file})
+        self.assertFalse(form.is_valid())
+        self.assertIn('file', form.errors)
+
+
 class GivingRecordModelTests(TestCase):
     def test_defaults_to_pending_status(self):
         record = GivingRecord.objects.create(amount=100, currency='SSP')

@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.utils import timezone
 from finance.choices import Currency
 
@@ -10,6 +11,20 @@ def validate_photo_size(file):
     max_size_mb = 5
     if file.size > max_size_mb * 1024 * 1024:
         raise ValidationError(f"Image file is too large. Maximum size is {max_size_mb}MB.")
+
+
+validate_library_file_extension = FileExtensionValidator(
+    allowed_extensions=['pdf', 'epub', 'doc', 'docx', 'ppt', 'pptx', 'txt'],
+    message="Unsupported file type. Allowed: PDF, EPUB, DOC(X), PPT(X), TXT.",
+)
+
+
+def validate_library_file_size(file):
+    """Books/documents can be bigger than a photo, but still bounded — an unrestricted
+    FileField would otherwise let anyone with upload access fill the server's disk."""
+    max_size_mb = 25
+    if file.size > max_size_mb * 1024 * 1024:
+        raise ValidationError(f"File is too large. Maximum size is {max_size_mb}MB.")
 
 
 class Branch(models.Model):
@@ -245,7 +260,10 @@ class LibraryResource(models.Model):
     author = models.CharField(max_length=150, blank=True)
     description = models.TextField(blank=True)
     cover_image = models.ImageField(upload_to='church/library/covers/', blank=True, null=True)
-    file = models.FileField(upload_to='church/library/', blank=True, null=True)
+    file = models.FileField(
+        upload_to='church/library/', blank=True, null=True,
+        validators=[validate_library_file_extension, validate_library_file_size],
+    )
     external_url = models.URLField(blank=True)
     category = models.CharField(max_length=100, blank=True)
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='library_resources')
