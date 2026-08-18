@@ -16,6 +16,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 
+    'django_celery_beat',
+
     'accounts',
     'core',
     'newsfeed',
