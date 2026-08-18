@@ -4,6 +4,11 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = config('SECRET_KEY')
+# Separate from SECRET_KEY on purpose — used for application-level field
+# encryption (accounts.fields.EncryptedCharField), so rotating one doesn't
+# force rotating the other. Generate with:
+#   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+FIELD_ENCRYPTION_KEY = config('FIELD_ENCRYPTION_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost', cast=lambda v: [s.strip() for s in v.split(',')])
 

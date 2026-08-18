@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from .fields import EncryptedCharField
+
 
 class User(AbstractUser):
     class Role(models.TextChoices):
@@ -25,7 +27,7 @@ class User(AbstractUser):
         default=False,
         help_text="If true, the user is forced to set a new password before doing anything else."
     )
-    totp_secret = models.CharField(max_length=32, blank=True)
+    totp_secret = EncryptedCharField(max_length=255, blank=True, help_text="Encrypted at rest — see accounts.fields.EncryptedCharField")
     two_factor_enabled = models.BooleanField(default=False)
     two_factor_backup_codes = models.TextField(blank=True, help_text="JSON list of hashed one-time backup codes")
 

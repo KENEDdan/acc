@@ -38,6 +38,7 @@ jobs:
     env:
       DJANGO_SETTINGS_MODULE: config.settings.dev
       SECRET_KEY: ci-only-secret-key-not-used-anywhere-real
+      FIELD_ENCRYPTION_KEY: MTKLRXP2lzk3USEHnrBlXhA94NxWIrKTTym8vdIMX2c=
       DB_NAME: acc_platform_ci
       DB_USER: acc_ci
       DB_PASSWORD: acc_ci_password

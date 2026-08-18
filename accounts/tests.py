@@ -11,6 +11,41 @@ from accounts.two_factor import (
 User = get_user_model()
 
 
+class TotpSecretEncryptionTests(TestCase):
+    """The totp_secret field is encrypted at rest with accounts.fields.EncryptedCharField —
+    a raw database dump alone shouldn't hand over the ability to generate someone's 2FA codes."""
+
+    def test_round_trips_through_the_orm(self):
+        secret = generate_totp_secret()
+        user = User.objects.create_user(username='totptest', password='x', role='church_finance')
+        user.totp_secret = secret
+        user.save()
+
+        fresh = User.objects.get(pk=user.pk)
+        self.assertEqual(fresh.totp_secret, secret)
+
+    def test_raw_database_value_is_not_the_plaintext_secret(self):
+        from django.db import connection
+
+        secret = generate_totp_secret()
+        user = User.objects.create_user(username='totptest2', password='x', role='church_finance')
+        user.totp_secret = secret
+        user.save()
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT totp_secret FROM accounts_user WHERE id = %s", [user.pk])
+            raw_value = cursor.fetchone()[0]
+
+        self.assertNotEqual(raw_value, secret)
+        self.assertNotIn(secret, raw_value)
+
+    def test_blank_secret_stays_blank(self):
+        user = User.objects.create_user(username='totptest3', password='x', role='member')
+        self.assertEqual(user.totp_secret, '')
+        fresh = User.objects.get(pk=user.pk)
+        self.assertEqual(fresh.totp_secret, '')
+
+
 class UserModelTests(TestCase):
     def test_is_superadmin(self):
         su = User.objects.create_user(username='su', password='x', role=User.Role.SUPERADMIN)
