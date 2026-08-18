@@ -10,6 +10,17 @@ import datetime
 User = get_user_model()
 
 
+class HealthCheckTests(TestCase):
+    def test_returns_ok_with_working_database(self):
+        response = Client().get('/healthz/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'status': 'ok'})
+
+    def test_post_not_allowed(self):
+        response = Client().post('/healthz/')
+        self.assertEqual(response.status_code, 405)
+
+
 class HomeViewTests(TestCase):
     def test_home_page_loads(self):
         c = Client()

@@ -2,8 +2,10 @@ from django.views.generic import TemplateView, ListView
 from django.contrib.auth.views import LoginView
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth import get_user_model
+from django.db import connection
+from django.db.utils import OperationalError
 import json
 import re
 
@@ -14,6 +16,18 @@ from church.models import Member, Branch, DiscipleshipEnrollment, LiveService, P
 from gym.models import SchoolDisciple, School
 
 User = get_user_model()
+
+
+@require_GET
+def health_check(request):
+    """For uptime monitors / load balancer health checks — unauthenticated,
+    unrate-limited, and does a real DB round trip rather than just returning 200."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+    except OperationalError:
+        return JsonResponse({'status': 'error', 'database': 'unreachable'}, status=503)
+    return JsonResponse({'status': 'ok'})
 
 
 class HomeView(TemplateView):
@@ -69,6 +83,10 @@ class AboutOverviewView(TemplateView):
 
 class ContactView(TemplateView):
     template_name = "core/contact.html"
+
+
+class PrivacyPolicyView(TemplateView):
+    template_name = "core/privacy_policy.html"
 
 
 def _live_status_answer():
