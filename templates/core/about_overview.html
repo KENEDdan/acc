@@ -1,23 +1,24 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}About Us{% endblock %}
 {% block content %}
 <h1>About Apostolic Campus Church</h1>
 <p>Apostolic Campus Church (ACC) operates three ministries under one mission &mdash; the Church itself, the Global Youth Ministry (GYM), and the Apostles' Feet Foundation (AFF).</p>
 <div class="feed-grid">
     <a class="feed-card" href="{% url 'church:about' %}">
-        <div class="no-image"></div>
+        <img src="{% static 'img/acc_logo.png' %}" alt="Apostolic Campus Church logo">
         <div class="feed-card-body"><h3>Church (ACC)</h3><p>Learn about our church, leadership, and mission.</p></div>
     </a>
     <a class="feed-card" href="{% url 'gym:about' %}">
-        <div class="no-image"></div>
+        <img src="{% static 'img/gym_logo.jpg' %}" alt="Global Youth Ministry logo">
         <div class="feed-card-body"><h3>Global Youth Ministry</h3><p>Learn about GYM's work in schools.</p></div>
     </a>
     <a class="feed-card" href="{% url 'church:pastors_elders' %}">
-        <div class="no-image"></div>
+        <img src="{% static 'img/pastors&elders.webp' %}" alt="Pastors and Elders">
         <div class="feed-card-body"><h3>Pastors &amp; Elders</h3><p>Meet the leaders serving across our branches.</p></div>
     </a>
     <a class="feed-card" href="{% url 'aff:about' %}">
-        <div class="no-image"></div>
+        <img src="{% static 'img/apostolic.webp' %}" alt="Apostles' Feet Foundation">
         <div class="feed-card-body"><h3>Apostles' Feet Foundation</h3><p>Learn about AFF's support programs.</p></div>
     </a>
 </div>
