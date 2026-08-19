@@ -10,6 +10,11 @@ SECRET_KEY = config('SECRET_KEY')
 #   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 FIELD_ENCRYPTION_KEY = config('FIELD_ENCRYPTION_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
+
+# Used to build absolute links in emails (notifications, etc.) sent from code
+# paths that don't have a `request` to call build_absolute_uri() on. Set this
+# to the real https:// domain in production.
+SITE_BASE_URL = config('SITE_BASE_URL', default='http://127.0.0.1:8000')
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost', cast=lambda v: [s.strip() for s in v.split(',')])
 
 INSTALLED_APPS = [

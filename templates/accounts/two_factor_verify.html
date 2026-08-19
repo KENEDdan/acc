@@ -15,6 +15,31 @@
         <button type="submit" class="btn-primary" style="width:100%; margin-top:12px;">Verify</button>
     </form>
 
+    {% if user_has_email %}
+    <details style="margin-top:16px;" {% if email_sent %}open{% endif %}>
+        <summary style="cursor:pointer; font-size:.82rem; color:var(--acc-muted);">No access to your authenticator? Email me a code instead</summary>
+        {% if email_sent %}
+        <form method="post" style="margin-top:10px;">
+            {% csrf_token %}
+            <input type="hidden" name="use_email" value="1">
+            <input type="text" name="code" inputmode="numeric" maxlength="6" placeholder="123456" style="width:100%; font-size:1.2rem; letter-spacing:2px; text-align:center;" autofocus>
+            <button type="submit" class="btn-primary" style="width:100%; margin-top:8px;">Verify Emailed Code</button>
+        </form>
+        <form method="post" style="margin-top:8px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="send_email_code">
+            <button type="submit" class="btn-secondary" style="width:100%;">Resend Code</button>
+        </form>
+        {% else %}
+        <form method="post" style="margin-top:10px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="send_email_code">
+            <button type="submit" class="btn-secondary" style="width:100%;">Email Me a Code</button>
+        </form>
+        {% endif %}
+    </details>
+    {% endif %}
+
     <details style="margin-top:16px;">
         <summary style="cursor:pointer; font-size:.82rem; color:var(--acc-muted);">Lost access to your authenticator? Use a backup code</summary>
         <form method="post" style="margin-top:10px;">

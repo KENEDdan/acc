@@ -1,3 +1,4 @@
+from django.core import mail
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 
@@ -6,6 +7,7 @@ from accounts.services import create_member_account, reset_member_password
 from accounts.two_factor import (
     role_requires_2fa, generate_totp_secret, get_totp_uri, verify_totp_code,
     generate_backup_codes, hash_backup_codes, verify_and_consume_backup_code,
+    send_email_otp, verify_email_otp,
 )
 
 User = get_user_model()
@@ -158,6 +160,91 @@ class TwoFactorTests(TestCase):
     def test_verify_and_consume_backup_code_with_no_codes_set(self):
         user = User.objects.create_user(username='nocode', password='x')
         self.assertFalse(verify_and_consume_backup_code(user, 'anything'))
+
+
+class FakeRequest:
+    """Minimal stand-in for send_email_otp/verify_email_otp, which only touch request.session."""
+    def __init__(self):
+        self.session = {}
+
+
+class EmailOtpTests(TestCase):
+    def test_send_email_otp_requires_email_on_file(self):
+        user = User.objects.create_user(username='noemail', password='x', role='member')
+        self.assertFalse(send_email_otp(user, FakeRequest()))
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_send_email_otp_sends_and_stores_code(self):
+        user = User.objects.create_user(username='hasemail', password='x', role='member', email='a@example.com')
+        req = FakeRequest()
+        self.assertTrue(send_email_otp(user, req))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('a@example.com', mail.outbox[0].to)
+        self.assertIn('2fa_email_code', req.session)
+
+    def test_verify_email_otp_correct_code(self):
+        user = User.objects.create_user(username='verifyok', password='x', role='member', email='b@example.com')
+        req = FakeRequest()
+        send_email_otp(user, req)
+        self.assertTrue(verify_email_otp(req, req.session['2fa_email_code']))
+
+    def test_verify_email_otp_wrong_code(self):
+        user = User.objects.create_user(username='verifybad', password='x', role='member', email='c@example.com')
+        req = FakeRequest()
+        send_email_otp(user, req)
+        self.assertFalse(verify_email_otp(req, '000000'))
+
+    def test_verify_email_otp_is_single_use(self):
+        user = User.objects.create_user(username='verifyonce', password='x', role='member', email='d@example.com')
+        req = FakeRequest()
+        send_email_otp(user, req)
+        code = req.session['2fa_email_code']
+        self.assertTrue(verify_email_otp(req, code))
+        self.assertFalse(verify_email_otp(req, code))
+
+    def test_verify_email_otp_expired(self):
+        import datetime
+        from django.utils import timezone
+        user = User.objects.create_user(username='verifyexpired', password='x', role='member', email='e@example.com')
+        req = FakeRequest()
+        send_email_otp(user, req)
+        code = req.session['2fa_email_code']
+        req.session['2fa_email_code_sent_at'] = (timezone.now() - datetime.timedelta(minutes=11)).isoformat()
+        self.assertFalse(verify_email_otp(req, code))
+
+    def test_verify_email_otp_with_no_pending_code(self):
+        self.assertFalse(verify_email_otp(FakeRequest(), '123456'))
+
+
+class TwoFactorEmailVerifyViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='viewtest2fa', password='Sup3rSecure!123', role='church_finance',
+            two_factor_enabled=True, email='viewtest@example.com', totp_secret='JBSWY3DPEHPK3PXP',
+        )
+
+    def test_full_email_otp_login_flow(self):
+        c = Client()
+        r = c.post('/portal/', {'username': 'viewtest2fa', 'password': 'Sup3rSecure!123'})
+        self.assertRedirects(r, '/account/2fa/verify/', fetch_redirect_response=False)
+
+        r = c.post('/account/2fa/verify/', {'action': 'send_email_code'})
+        self.assertEqual(r.status_code, 200)
+        self.assertIn('2fa_email_code', c.session)
+
+        code = c.session['2fa_email_code']
+        r = c.post('/account/2fa/verify/', {'code': code, 'use_email': '1'})
+        self.assertRedirects(r, '/dashboard/redirect/', fetch_redirect_response=False)
+
+    def test_email_option_hidden_without_email_on_file(self):
+        User.objects.create_user(
+            username='noemail2fa', password='Sup3rSecure!123', role='church_finance',
+            two_factor_enabled=True, totp_secret='JBSWY3DPEHPK3PXP',
+        )
+        c = Client()
+        c.post('/portal/', {'username': 'noemail2fa', 'password': 'Sup3rSecure!123'})
+        r = c.get('/account/2fa/verify/')
+        self.assertNotContains(r, 'Email Me a Code')
 
 
 class ForcePasswordChangeMiddlewareTests(TestCase):

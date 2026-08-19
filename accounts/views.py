@@ -4,9 +4,11 @@ from django.contrib.auth import update_session_auth_hash, login, get_user_model
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django_ratelimit.decorators import ratelimit
 from .two_factor import (
     generate_totp_secret, get_totp_uri, generate_qr_data_uri, verify_totp_code,
     generate_backup_codes, hash_backup_codes, verify_and_consume_backup_code,
+    send_email_otp, verify_email_otp,
 )
 
 
@@ -100,6 +102,7 @@ def two_factor_regenerate_backup_codes(request):
     return redirect('accounts:two_factor_manage')
 
 
+@ratelimit(key='ip', rate='15/h', method='POST', block=True)
 def two_factor_verify(request):
     """The login-time verification step. Reached only after a correct username/password
     for an account that has 2FA enabled - see PortalLoginView.form_valid in core/views.py."""
@@ -113,15 +116,34 @@ def two_factor_verify(request):
         return redirect('core:portal')
 
     error = None
+    email_sent = False
+
     if request.method == 'POST':
-        code = request.POST.get('code', '').strip()
-        use_backup = request.POST.get('use_backup') == '1'
-        valid = verify_and_consume_backup_code(user, code) if use_backup else verify_totp_code(user.totp_secret, code)
-        if valid:
-            del request.session['2fa_user_id']
-            next_url = request.session.pop('2fa_next', None) or reverse('dashboard:redirect')
-            user.backend = 'django.contrib.auth.backends.ModelBackend'
-            login(request, user)
-            return redirect(next_url)
-        error = "Invalid code. Please try again."
-    return render(request, 'accounts/two_factor_verify.html', {'error': error})
+        if request.POST.get('action') == 'send_email_code':
+            if send_email_otp(user, request):
+                email_sent = True
+                messages.success(request, f"A verification code was sent to {user.email}.")
+            else:
+                error = "No email address is on file for this account."
+        else:
+            code = request.POST.get('code', '').strip()
+            use_backup = request.POST.get('use_backup') == '1'
+            use_email = request.POST.get('use_email') == '1'
+            if use_email:
+                valid = verify_email_otp(request, code)
+            elif use_backup:
+                valid = verify_and_consume_backup_code(user, code)
+            else:
+                valid = verify_totp_code(user.totp_secret, code)
+
+            if valid:
+                del request.session['2fa_user_id']
+                next_url = request.session.pop('2fa_next', None) or reverse('dashboard:redirect')
+                user.backend = 'django.contrib.auth.backends.ModelBackend'
+                login(request, user)
+                return redirect(next_url)
+            error = "Invalid code. Please try again."
+
+    return render(request, 'accounts/two_factor_verify.html', {
+        'error': error, 'email_sent': email_sent, 'user_has_email': bool(user.email),
+    })
