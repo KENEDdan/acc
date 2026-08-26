@@ -1,5 +1,22 @@
 from django.db.models import Sum
 
+_CSV_FORMULA_PREFIXES = ('=', '+', '-', '@', '\t', '\r')
+
+
+def sanitize_csv_cell(value):
+    """Neutralizes CSV/formula injection (OWASP CSV Injection): a cell that
+    starts with =, +, -, @, tab, or CR can be read as a formula by Excel/
+    LibreOffice when the exported file is opened. Prefixing with a single
+    quote keeps the value literal without changing what's displayed."""
+    text = '' if value is None else str(value)
+    if text.startswith(_CSV_FORMULA_PREFIXES):
+        return "'" + text
+    return text
+
+
+def sanitize_csv_row(row):
+    return [sanitize_csv_cell(cell) for cell in row]
+
 
 def currency_breakdown(income_qs, expense_qs):
     data = {}

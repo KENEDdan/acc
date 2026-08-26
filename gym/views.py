@@ -7,7 +7,7 @@ import csv
 import re
 
 from newsfeed.models import FeedItem, FeedItemManager
-from finance.utils import currency_breakdown, period_breakdown
+from finance.utils import currency_breakdown, period_breakdown, sanitize_csv_row
 from audit.models import AuditLog
 from audit.services import log_action
 from .models import School, SchoolMember, SchoolVolunteer, SchoolDisciple, SchoolActivity, AboutUs, FinanceRecord
@@ -332,9 +332,9 @@ def finance_report_export(request):
     writer = csv.writer(response)
     writer.writerow(['Date', 'Type', 'Category', 'Amount', 'Currency', 'School', 'Description', 'Recorded By'])
     for r in qs:
-        writer.writerow([
+        writer.writerow(sanitize_csv_row([
             r.date, r.get_type_display(), r.income_category or r.expense_category or r.other_category_note,
             r.amount, r.currency, r.school.name if r.school else '', r.description,
             r.recorded_by.get_full_name() or r.recorded_by.username if r.recorded_by else '',
-        ])
+        ]))
     return response
