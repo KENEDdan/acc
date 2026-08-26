@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from finance.choices import Currency
+from core.validators import validate_image_extension
 
 
 class School(models.Model):
@@ -75,7 +76,7 @@ class SchoolActivity(models.Model):
     category = models.CharField(max_length=30, choices=Category.choices)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='gym/activities/', blank=True, null=True)
+    image = models.ImageField(upload_to='gym/activities/', blank=True, null=True, validators=[validate_image_extension])
     date = models.DateField(blank=True, null=True)
     schedule_text = models.CharField(max_length=200, blank=True)
 

@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.utils import timezone
 from finance.choices import Currency
+from core.validators import validate_image_extension
 
 
 def validate_photo_size(file):
@@ -81,7 +82,7 @@ class Activity(models.Model):
     name = models.CharField(max_length=150)
     category = models.CharField(max_length=30, choices=Category.choices)
     description = models.TextField()
-    image = models.ImageField(upload_to='church/activities/', blank=True, null=True)
+    image = models.ImageField(upload_to='church/activities/', blank=True, null=True, validators=[validate_image_extension])
     schedule_text = models.CharField(max_length=200, help_text="e.g. Every Sunday 9:00 AM - 10:00 PM")
     led_by = models.CharField(max_length=150, blank=True)
     is_active = models.BooleanField(default=True)
@@ -132,7 +133,7 @@ class Member(models.Model):
     prior_duration = models.CharField(max_length=100, blank=True, help_text="If old member, how long at the church")
 
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
-    photo = models.ImageField(upload_to='church/members/', blank=True, null=True)
+    photo = models.ImageField(upload_to='church/members/', blank=True, null=True, validators=[validate_image_extension])
 
     registered_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='members_registered')
     registered_at = models.DateTimeField(auto_now_add=True)
@@ -259,7 +260,7 @@ class LibraryResource(models.Model):
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=150, blank=True)
     description = models.TextField(blank=True)
-    cover_image = models.ImageField(upload_to='church/library/covers/', blank=True, null=True)
+    cover_image = models.ImageField(upload_to='church/library/covers/', blank=True, null=True, validators=[validate_image_extension])
     file = models.FileField(
         upload_to='church/library/', blank=True, null=True,
         validators=[validate_library_file_extension, validate_library_file_size],
@@ -351,7 +352,7 @@ class PastorElder(models.Model):
         OTHER = 'other', 'Other (Specify)'
 
     full_name = models.CharField(max_length=150)
-    photo = models.ImageField(upload_to='church/leaders/', blank=True, null=True, validators=[validate_photo_size])
+    photo = models.ImageField(upload_to='church/leaders/', blank=True, null=True, validators=[validate_photo_size, validate_image_extension])
     role_title = models.CharField(max_length=30, choices=RoleTitle.choices)
     role_title_other = models.CharField(max_length=100, blank=True, help_text="Only used if 'Other' is selected above")
     branch = models.ForeignKey(
@@ -512,7 +513,7 @@ class GivingRecord(models.Model):
     currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.SSP)
     transaction_reference = models.CharField(max_length=100, blank=True, help_text="Bank deposit slip / mobile money transaction ID, if you have one")
     proof_of_payment = models.ImageField(
-        upload_to='church/giving/proofs/', blank=True, null=True, validators=[validate_photo_size],
+        upload_to='church/giving/proofs/', blank=True, null=True, validators=[validate_photo_size, validate_image_extension],
         help_text="Optional — a screenshot or photo of the payment confirmation"
     )
     message = models.TextField(blank=True, help_text="Optional note to the church")

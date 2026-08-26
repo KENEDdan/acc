@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from core.validators import validate_image_extension
 from .fields import EncryptedCharField
 
 
@@ -22,7 +23,7 @@ class User(AbstractUser):
 
     role = models.CharField(max_length=30, choices=Role.choices, default=Role.MEMBER)
     phone_number = models.CharField(max_length=20, blank=True)
-    profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)
+    profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True, validators=[validate_image_extension])
     must_change_password = models.BooleanField(
         default=False,
         help_text="If true, the user is forced to set a new password before doing anything else."
