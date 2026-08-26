@@ -13,3 +13,9 @@ class FeedItemForm(forms.ModelForm):
             'published_at': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'expires_at': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get('is_featured') and not cleaned_data.get('expires_at'):
+            self.add_error('expires_at', "Required unless this item is marked as Featured (kept indefinitely).")
+        return cleaned_data

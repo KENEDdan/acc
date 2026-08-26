@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.urls import reverse
 
+from core.validators import validate_image_extension
+
 
 class FeedItem(models.Model):
     class Scope(models.TextChoices):
@@ -26,12 +28,13 @@ class FeedItem(models.Model):
     slug = models.SlugField(max_length=220, unique=True, blank=True)
     summary = models.CharField(max_length=300, help_text="Short teaser shown on the feed card")
     body = models.TextField()
-    image = models.ImageField(upload_to='newsfeed/', blank=True, null=True)
+    image = models.ImageField(upload_to='newsfeed/', blank=True, null=True, validators=[validate_image_extension])
     event_date = models.DateTimeField(blank=True, null=True, help_text="For events/reminders")
     is_pinned = models.BooleanField(default=False, help_text="Live items are auto-pinned")
+    is_featured = models.BooleanField(default=False, help_text="Keep this item visible indefinitely, ignoring its expiry date")
     is_active = models.BooleanField(default=True)
     published_at = models.DateTimeField(default=timezone.now)
-    expires_at = models.DateTimeField(help_text="Item is hidden automatically after this time")
+    expires_at = models.DateTimeField(blank=True, null=True, help_text="Item is hidden automatically after this time. Leave blank if Featured.")
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='feed_items')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -60,6 +63,8 @@ class FeedItem(models.Model):
 
     @property
     def is_expired(self):
+        if self.is_featured or not self.expires_at:
+            return False
         return timezone.now() >= self.expires_at
 
 
@@ -68,10 +73,11 @@ class FeedItemManager:
 
     @staticmethod
     def active(scope=None):
+        now = timezone.now()
         qs = FeedItem.objects.filter(
+            models.Q(is_featured=True) | models.Q(expires_at__gt=now),
             is_active=True,
-            expires_at__gt=timezone.now(),
-            published_at__lte=timezone.now(),
+            published_at__lte=now,
         )
         if scope:
             qs = qs.filter(scope=scope)

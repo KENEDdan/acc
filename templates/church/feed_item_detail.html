@@ -12,7 +12,7 @@
             <div class="form-field"><label>Type</label><div>{{ item.get_item_type_display }}</div></div>
             <div class="form-field"><label>Status</label><div>{% if item.is_active %}<span class="badge badge-active">Active</span>{% else %}<span class="badge badge-inactive">Inactive</span>{% endif %}</div></div>
             <div class="form-field"><label>Published</label><div>{{ item.published_at|date:"M d, Y g:i A" }}</div></div>
-            <div class="form-field"><label>Expires</label><div>{{ item.expires_at|date:"M d, Y g:i A" }}</div></div>
+            <div class="form-field"><label>Expires</label><div>{% if item.is_featured %}<span class="badge badge-active">Never (Featured)</span>{% else %}{{ item.expires_at|date:"M d, Y g:i A" }}{% endif %}</div></div>
             {% if item.event_date %}<div class="form-field"><label>Event Date</label><div>{{ item.event_date|date:"M d, Y g:i A" }}</div></div>{% endif %}
             <div class="form-field full"><label>Summary</label><div>{{ item.summary }}</div></div>
             <div class="form-field full"><label>Body</label><div>{{ item.body|linebreaks }}</div></div>
