@@ -1,7 +1,29 @@
 services:
+  web:
+    build: .
+    container_name: acc_web
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DB_HOST: db
+      DB_PORT: "5432"
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - acc_media:/app/media
+      - acc_staticfiles:/app/staticfiles
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   db:
     image: postgres:15-alpine
     container_name: acc_db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: acc_platform
       POSTGRES_USER: acc_admin
@@ -10,12 +32,25 @@ services:
       - "5436:5432"
     volumes:
       - acc_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U acc_admin -d acc_platform"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
     container_name: acc_redis
+    restart: unless-stopped
     ports:
       - "6382:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   acc_pgdata:
+  acc_media:
+  acc_staticfiles:
