@@ -14,6 +14,7 @@ from django_ratelimit.decorators import ratelimit
 from newsfeed.models import FeedItem, FeedItemManager
 from church.models import Member, Branch, DiscipleshipEnrollment, LiveService, PastorElder
 from gym.models import SchoolDisciple, School
+from .models import SiteContact
 
 User = get_user_model()
 
@@ -83,6 +84,11 @@ class AboutOverviewView(TemplateView):
 
 class ContactView(TemplateView):
     template_name = "core/contact.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['contact'] = SiteContact.objects.first()
+        return ctx
 
 
 class PrivacyPolicyView(TemplateView):

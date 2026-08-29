@@ -11,5 +11,7 @@ urlpatterns = [
     path('accounts/<int:pk>/', views.account_detail, name='account_detail'),
     path('accounts/<int:pk>/edit/', views.account_edit, name='account_edit'),
     path('accounts/<int:pk>/toggle-active/', views.account_toggle_active, name='account_toggle_active'),
+    path('about-us/<str:ministry>/', views.about_us_edit, name='about_us_edit'),
+    path('contact/', views.contact_edit, name='contact_edit'),
     path('member/', views.member_dashboard, name='member'),
 ]

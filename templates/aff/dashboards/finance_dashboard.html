@@ -3,6 +3,9 @@
 {% block dash_eyebrow %}Apostles' Feet Foundation{% endblock %}
 {% block dash_title %}Finance &amp; Requests Dashboard{% endblock %}
 {% block dash_actions %}
+<a class="btn-secondary" href="{% url 'finance:budget_queue_finance' %}">
+    Budget Approvals{% if pending_budget_count %} <span class="badge badge-pending">{{ pending_budget_count }}</span>{% endif %}
+</a>
 <a class="btn-secondary" href="{% url 'aff:finance_reports' %}">Reports</a>
 <a class="btn-secondary" href="{% url 'aff:reconciliation_create' %}">+ Reconcile Cash</a>
 <a class="btn-secondary" href="{% url 'aff:finance_create' %}">+ Record Entry</a>

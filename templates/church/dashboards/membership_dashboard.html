@@ -3,6 +3,7 @@
 {% block dash_eyebrow %}Church (ACC){% endblock %}
 {% block dash_title %}Membership Dashboard{% endblock %}
 {% block dash_actions %}
+<a class="btn-secondary" href="{% url 'finance:budget_list' %}">Budget Planner</a>
 <a class="btn-secondary" href="{% url 'church:members_list' %}">All Members</a>
 <a class="btn-secondary" href="{% url 'church:counseling_queue' %}">Today's Counseling Queue</a>
 <a class="btn-secondary" href="{% url 'church:counseling_requests_list' %}">Counseling Requests</a>

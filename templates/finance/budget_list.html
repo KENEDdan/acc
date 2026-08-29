@@ -1,0 +1,31 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}My Budget Requests{% endblock %}
+{% block dash_eyebrow %}Budget Planner{% endblock %}
+{% block dash_title %}My Budget Requests{% endblock %}
+{% block dash_actions %}
+<a class="btn-primary" href="{% url 'finance:budget_create' %}">+ New Budget Request</a>
+{% endblock %}
+{% block dash_content %}
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Submitted Budgets</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Activity / Event</th><th>Category</th><th>Amount</th><th>Status</th><th>Updated</th><th></th></tr></thead>
+        <tbody>
+        {% for b in budgets %}
+            <tr>
+                <td>{{ b.title }}</td>
+                <td>{{ b.category }}</td>
+                <td>{{ b.amount }} {{ b.currency }}</td>
+                <td><span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span></td>
+                <td>{{ b.updated_at|date:"M d, Y" }}</td>
+                <td><a class="btn-secondary" href="{% url 'finance:budget_detail' b.pk %}">View</a></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="dash-empty">No budget requests yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

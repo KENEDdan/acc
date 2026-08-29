@@ -7,6 +7,9 @@
 {% block dash_title %}Finance Dashboard{% endblock %}
 
 {% block dash_actions %}
+    <a class="btn-secondary" href="{% url 'finance:budget_queue_finance' %}">
+        Budget Approvals{% if pending_budget_count %} <span class="badge badge-pending">{{ pending_budget_count }}</span>{% endif %}
+    </a>
     <a class="btn-secondary" href="{% url 'church:finance_reports' %}">Reports</a>
     <a class="btn-secondary" href="{% url 'church:giving_accounts_list' %}">Giving Accounts</a>
     <a class="btn-secondary" href="{% url 'church:giving_records_list' %}">

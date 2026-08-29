@@ -8,6 +8,7 @@ from django.http import HttpResponse
 
 from newsfeed.models import FeedItem, FeedItemManager
 from finance.utils import currency_breakdown, period_breakdown, sanitize_csv_row
+from finance.models import Budget
 from audit.models import AuditLog
 from audit.services import log_action
 from notifications.services import notify_user, notify_superadmins, notify_role
@@ -78,6 +79,7 @@ class FinanceDashboardView(RoleDashboardMixin, TemplateView):
         ctx['info_needed_requests'] = AssistanceRequest.objects.filter(status=AssistanceRequest.Status.INFO_NEEDED)
         ctx['all_requests'] = AssistanceRequest.objects.all()[:20]
         ctx['recent_reconciliations'] = CashReconciliation.objects.all()[:10]
+        ctx['pending_budget_count'] = Budget.objects.filter(scope='aff').exclude(status=Budget.Status.APPROVED).count()
         return ctx
 
 

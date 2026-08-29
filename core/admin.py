@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import SiteContact
 
-# Register your models here.
+
+@admin.register(SiteContact)
+class SiteContactAdmin(admin.ModelAdmin):
+    list_display = ('phone_primary', 'email', 'updated_by', 'updated_at')

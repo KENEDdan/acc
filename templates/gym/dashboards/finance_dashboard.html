@@ -3,6 +3,9 @@
 {% block dash_eyebrow %}Global Youth Ministry{% endblock %}
 {% block dash_title %}Finance Dashboard{% endblock %}
 {% block dash_actions %}
+<a class="btn-secondary" href="{% url 'finance:budget_queue_finance' %}">
+    Budget Approvals{% if pending_budget_count %} <span class="badge badge-pending">{{ pending_budget_count }}</span>{% endif %}
+</a>
 <a class="btn-secondary" href="{% url 'gym:finance_reports' %}">Reports</a>
 <a class="btn-primary" href="{% url 'gym:finance_create' %}">+ Record Entry</a>
 {% endblock %}

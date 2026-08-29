@@ -29,6 +29,7 @@ from django.http import HttpResponse
 from .id_cards import generate_member_id_card_pdf
 from accounts.services import create_member_account, reset_member_password
 from notifications.services import notify_role, notify_superadmins, notify_user
+from finance.models import Budget
 from .models import (
     Activity, Member, DiscipleshipEnrollment, MediaItem,
     LibraryResource, AboutUs, FinanceRecord, Branch, LiveService,
@@ -163,6 +164,7 @@ class FinanceDashboardView(RoleDashboardMixin, TemplateView):
         ctx['finance_breakdown'] = currency_breakdown(income_qs, expense_qs)
         ctx['recent_records'] = FinanceRecord.objects.all()[:20]
         ctx['pending_giving_count'] = GivingRecord.objects.filter(status=GivingRecord.Status.PENDING).count()
+        ctx['pending_budget_count'] = Budget.objects.filter(scope='church').exclude(status=Budget.Status.APPROVED).count()
         return ctx
 
 

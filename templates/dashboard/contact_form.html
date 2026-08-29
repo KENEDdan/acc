@@ -1,0 +1,35 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}Edit Contact Information{% endblock %}
+{% block dash_eyebrow %}Superadmin{% endblock %}
+{% block dash_title %}Contact Information{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+<form method="post">
+    {% csrf_token %}
+    <div class="form-section">
+        <h3 class="form-section-title">Contact Details</h3>
+        <p class="form-section-hint">Shown on the public Contact page.</p>
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.phone_primary %}
+            {% include "partials/form_field.html" with field=form.phone_secondary %}
+            {% include "partials/form_field.html" with field=form.email %}
+            {% include "partials/form_field.html" with field=form.address wide=True %}
+        </div>
+    </div>
+    <div class="form-section">
+        <h3 class="form-section-title">Social &amp; Map</h3>
+        <div class="form-grid">
+            {% include "partials/form_field.html" with field=form.facebook_url %}
+            {% include "partials/form_field.html" with field=form.twitter_url %}
+            {% include "partials/form_field.html" with field=form.instagram_url %}
+            {% include "partials/form_field.html" with field=form.whatsapp_url %}
+            {% include "partials/form_field.html" with field=form.map_embed_url wide=True %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Save</button>
+        <a class="btn-secondary" href="{% url 'dashboard:superadmin' %}">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

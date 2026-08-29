@@ -8,6 +8,7 @@ import re
 
 from newsfeed.models import FeedItem, FeedItemManager
 from finance.utils import currency_breakdown, period_breakdown, sanitize_csv_row
+from finance.models import Budget
 from audit.models import AuditLog
 from audit.services import log_action
 from .models import School, SchoolMember, SchoolVolunteer, SchoolDisciple, SchoolActivity, AboutUs, FinanceRecord
@@ -119,6 +120,7 @@ class FinanceDashboardView(RoleDashboardMixin, TemplateView):
         expense_qs = qs.filter(type=FinanceRecord.Type.EXPENSE).values('currency').annotate(total=Sum('amount'))
         ctx['finance_breakdown'] = currency_breakdown(income_qs, expense_qs)
         ctx['recent_records'] = FinanceRecord.objects.all()[:20]
+        ctx['pending_budget_count'] = Budget.objects.filter(scope='gym').exclude(status=Budget.Status.APPROVED).count()
         return ctx
 
 

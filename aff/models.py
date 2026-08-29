@@ -1,6 +1,32 @@
 from django.db import models
 from django.conf import settings
 from finance.choices import Currency
+from core.validators import validate_image_extension
+
+
+class Activity(models.Model):
+    class Category(models.TextChoices):
+        PROGRAM = 'program', 'Support Program'
+        OUTREACH = 'outreach', 'Community Outreach'
+        TRAINING = 'training', 'Training & Mentorship'
+        COMMUNITY_EVENT = 'community_event', 'Community Event'
+        ADMINISTRATIVE = 'administrative', 'Administrative'
+        FUNDRAISING = 'fundraising', 'Fundraising'
+        OTHER = 'other', 'Other'
+
+    name = models.CharField(max_length=150)
+    category = models.CharField(max_length=30, choices=Category.choices)
+    description = models.TextField()
+    image = models.ImageField(upload_to='aff/activities/', blank=True, null=True, validators=[validate_image_extension])
+    schedule_text = models.CharField(max_length=200, blank=True, help_text="e.g. Every last Saturday of the month")
+    led_by = models.CharField(max_length=150, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name_plural = "Activities"
+
+    def __str__(self):
+        return self.name
 
 
 class AssistanceRequest(models.Model):

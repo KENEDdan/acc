@@ -3,6 +3,7 @@
 {% block dash_eyebrow %}Church (ACC){% endblock %}
 {% block dash_title %}Information Dashboard{% endblock %}
 {% block dash_actions %}
+<a class="btn-secondary" href="{% url 'finance:budget_list' %}">Budget Planner</a>
 <a class="btn-primary" href="{% url 'church:feed_item_create' %}">+ Add Feed Item</a>
 {% endblock %}
 {% block dash_content %}

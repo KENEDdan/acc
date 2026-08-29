@@ -20,7 +20,44 @@
     <a class="feed-card" href="{% url 'aff:console' %}">
         <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>Apostles' Feet Foundation</h3><p>Open the AFF management console &rarr;</p></div>
     </a>
+    <a class="feed-card" href="{% url 'finance:budget_queue_superadmin' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>Budget Approvals</h3><p>{{ pending_budgets.count }} awaiting your approval &rarr;</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'dashboard:about_us_edit' 'church' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>Church About Us</h3><p>Edit the public About Us page &rarr;</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'dashboard:about_us_edit' 'gym' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>GYM About Us</h3><p>Edit the public About Us page &rarr;</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'dashboard:about_us_edit' 'aff' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>AFF About Us</h3><p>Edit the public About Us page &rarr;</p></div>
+    </a>
+    <a class="feed-card" href="{% url 'dashboard:contact_edit' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>Contact Information</h3><p>Edit the public Contact page &rarr;</p></div>
+    </a>
 </div>
+
+{% if pending_budgets %}
+<div class="dash-table-wrap">
+    <div class="dash-table-head"><h3>Budget Requests Awaiting Your Approval</h3></div>
+    <div class="dash-table-scroll">
+    <table class="dash-table">
+        <thead><tr><th>Activity / Event</th><th>Scope</th><th>Amount</th><th>Submitted By</th><th></th></tr></thead>
+        <tbody>
+        {% for b in pending_budgets %}
+            <tr>
+                <td>{{ b.title }}</td>
+                <td>{{ b.get_scope_display }}</td>
+                <td>{{ b.amount }} {{ b.currency }}</td>
+                <td>{{ b.submitted_by.get_full_name|default:b.submitted_by.username }}</td>
+                <td><a class="btn-secondary" href="{% url 'finance:budget_detail' b.pk %}">Review</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endif %}
 
 <h2 class="dash-subhead">Church (ACC)</h2>
 <div class="kpi-grid">

@@ -3,6 +3,7 @@
 {% block dash_eyebrow %}Global Youth Ministry{% endblock %}
 {% block dash_title %}Schools Dashboard{% endblock %}
 {% block dash_actions %}
+<a class="btn-secondary" href="{% url 'finance:budget_list' %}">Budget Planner</a>
 <a class="btn-secondary" href="{% url 'gym:school_create' %}">+ Add School</a>
 <a class="btn-secondary" href="{% url 'gym:school_volunteer_create' %}">+ Add Volunteer</a>
 <a class="btn-secondary" href="{% url 'gym:school_disciple_create' %}">+ Add Disciple</a>

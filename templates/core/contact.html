@@ -2,5 +2,27 @@
 {% block title %}Contact Us{% endblock %}
 {% block content %}
 <h1>Contact Us</h1>
-<p>Reach out to Apostolic Campus Church. Contact details will be added here once supplied.</p>
+{% if contact %}
+<div class="form-grid" style="margin-top:16px;">
+    {% if contact.phone_primary %}<div class="form-field"><label>Phone</label><div>{{ contact.phone_primary }}</div></div>{% endif %}
+    {% if contact.phone_secondary %}<div class="form-field"><label>Phone (Alt)</label><div>{{ contact.phone_secondary }}</div></div>{% endif %}
+    {% if contact.email %}<div class="form-field"><label>Email</label><div><a href="mailto:{{ contact.email }}">{{ contact.email }}</a></div></div>{% endif %}
+    {% if contact.address %}<div class="form-field full"><label>Address</label><div>{{ contact.address|linebreaks }}</div></div>{% endif %}
+</div>
+{% if contact.facebook_url or contact.twitter_url or contact.instagram_url or contact.whatsapp_url %}
+<div class="form-actions">
+    {% if contact.facebook_url %}<a class="btn-secondary" href="{{ contact.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
+    {% if contact.twitter_url %}<a class="btn-secondary" href="{{ contact.twitter_url }}" target="_blank" rel="noopener">Twitter / X</a>{% endif %}
+    {% if contact.instagram_url %}<a class="btn-secondary" href="{{ contact.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+    {% if contact.whatsapp_url %}<a class="btn-secondary" href="{{ contact.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}
+</div>
+{% endif %}
+{% if contact.map_embed_url %}
+<div style="margin-top:20px;">
+    <iframe src="{{ contact.map_embed_url }}" width="100%" height="320" style="border:0; border-radius:14px;" allowfullscreen loading="lazy"></iframe>
+</div>
+{% endif %}
+{% else %}
+<p>Contact details will be added here once supplied.</p>
+{% endif %}
 {% endblock %}

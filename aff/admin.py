@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import AssistanceRequest, AboutUs, FinanceRecord, CashReconciliation
+from .models import Activity, AssistanceRequest, AboutUs, FinanceRecord, CashReconciliation
+
+
+@admin.register(Activity)
+class ActivityAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'schedule_text', 'led_by', 'is_active')
+    list_filter = ('category', 'is_active')
 
 
 @admin.register(AssistanceRequest)

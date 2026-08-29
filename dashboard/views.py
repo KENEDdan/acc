@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .forms import AdminAccountCreateForm, AdminAccountEditForm
+from .forms import AdminAccountCreateForm, AdminAccountEditForm, AboutUsForm, SiteContactForm
 from audit.services import log_action
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse, NoReverseMatch
@@ -10,13 +10,24 @@ from django.contrib.auth import get_user_model
 
 from church.models import Member, Branch, DiscipleshipEnrollment, PastorElder, PrayerRequest, AttendanceRecord, CounselingSession, GivingRecord
 from church.models import FinanceRecord as ChurchFinanceRecord
+from church.models import AboutUs as ChurchAboutUs
 from gym.models import School, SchoolMember, SchoolVolunteer, SchoolDisciple
 from gym.models import FinanceRecord as GymFinanceRecord
+from gym.models import AboutUs as GymAboutUs
 from aff.models import AssistanceRequest
 from aff.models import FinanceRecord as AffFinanceRecord
+from aff.models import AboutUs as AffAboutUs
+from finance.models import Budget
 from finance.utils import currency_breakdown
+from core.models import SiteContact
 
 User = get_user_model()
+
+ABOUT_US_MODELS = {
+    'church': (ChurchAboutUs, 'Church (ACC)'),
+    'gym': (GymAboutUs, 'Global Youth Ministry'),
+    'aff': (AffAboutUs, "Apostles' Feet Foundation"),
+}
 
 
 @login_required
@@ -60,6 +71,7 @@ def superadmin_dashboard(request):
         'aff_pending_requests': AssistanceRequest.objects.filter(status=AssistanceRequest.Status.PENDING),
 
         'forwarded_prayer_requests': PrayerRequest.objects.filter(status=PrayerRequest.Status.FORWARDED),
+        'pending_budgets': Budget.objects.filter(status=Budget.Status.FORWARDED),
         'recent_attendance': AttendanceRecord.objects.all()[:5],
         'todays_counseling_current': CounselingSession.objects.filter(
             scheduled_slot__date=timezone.now().date(), status=CounselingSession.Status.CURRENT
@@ -138,6 +150,45 @@ def account_toggle_active(request, pk):
         )
         messages.success(request, f"Account '{account.username}' {'activated' if account.is_active else 'deactivated'}.")
     return redirect('dashboard:account_detail', pk=account.pk)
+
+
+@login_required
+@user_passes_test(_is_superadmin, login_url='/dashboard/redirect/')
+def about_us_edit(request, ministry):
+    model, label = ABOUT_US_MODELS.get(ministry, (None, None))
+    if model is None:
+        return redirect('dashboard:superadmin')
+    about, _ = model.objects.get_or_create(pk=1)
+    if request.method == 'POST':
+        form = AboutUsForm(request.POST)
+        if form.is_valid():
+            about.content = form.cleaned_data['content']
+            about.updated_by = request.user
+            about.save()
+            log_action(request.user, ministry, model.__name__, about, action='update', details='About Us content updated')
+            messages.success(request, f"{label} About Us page updated.")
+            return redirect('dashboard:superadmin')
+    else:
+        form = AboutUsForm(initial={'content': about.content})
+    return render(request, 'dashboard/about_us_form.html', {'form': form, 'label': label})
+
+
+@login_required
+@user_passes_test(_is_superadmin, login_url='/dashboard/redirect/')
+def contact_edit(request):
+    contact, _ = SiteContact.objects.get_or_create(pk=1)
+    if request.method == 'POST':
+        form = SiteContactForm(request.POST, instance=contact)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.updated_by = request.user
+            obj.save()
+            log_action(request.user, 'system', 'SiteContact', obj, action='update', details='Contact info updated')
+            messages.success(request, "Contact information updated.")
+            return redirect('dashboard:superadmin')
+    else:
+        form = SiteContactForm(instance=contact)
+    return render(request, 'dashboard/contact_form.html', {'form': form})
 
 
 @login_required

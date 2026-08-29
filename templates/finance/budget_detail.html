@@ -1,0 +1,95 @@
+{% extends "dashboard/_shell.html" %}
+{% block title %}{{ budget.title }}{% endblock %}
+{% block dash_eyebrow %}Budget Planner{% endblock %}
+{% block dash_title %}{{ budget.title }}{% endblock %}
+{% block dash_actions %}
+{% if can_edit %}
+<a class="btn-primary" href="{% url 'finance:budget_edit' budget.pk %}">Update &amp; Resubmit</a>
+{% endif %}
+{% if is_owner %}
+<a class="btn-secondary" href="{% url 'finance:budget_list' %}">Back to My Requests</a>
+{% elif is_finance %}
+<a class="btn-secondary" href="{% url 'finance:budget_queue_finance' %}">Back to Queue</a>
+{% elif is_superadmin %}
+<a class="btn-secondary" href="{% url 'finance:budget_queue_superadmin' %}">Back to Queue</a>
+{% endif %}
+{% endblock %}
+{% block dash_content %}
+<div class="form-page">
+    <div class="form-section">
+        <h3 class="form-section-title">Status</h3>
+        <p><span class="badge badge-{{ budget.status }}">{{ budget.get_status_display }}</span>
+        {% if budget.status == 'returned' %} — awaiting {% if budget.returned_by == 'finance' %}the submitter{% else %}the Finance Admin{% endif %}{% endif %}</p>
+        <div class="form-grid" style="margin-top:14px;">
+            <div class="form-field"><label>Category</label><div>{{ budget.category }}</div></div>
+            <div class="form-field"><label>Amount</label><div>{{ budget.amount }} {{ budget.currency }}</div></div>
+            <div class="form-field"><label>Submitted By</label><div>{{ budget.submitted_by.get_full_name|default:budget.submitted_by.username }}</div></div>
+            <div class="form-field"><label>Scope</label><div>{{ budget.get_scope_display }}</div></div>
+            <div class="form-field full"><label>Justification</label><div>{{ budget.justification }}</div></div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="form-section-title">Comments &amp; History</h3>
+        {% for c in budget.comments.all %}
+        <div class="form-top-note" style="margin-bottom:12px;">
+            <strong>{{ c.author.get_full_name|default:c.author.username }}</strong>
+            <span style="color:var(--acc-muted); font-size:.78rem;">— {{ c.get_action_display }} — {{ c.created_at|date:"M d, Y H:i" }}</span>
+            {% if c.message %}<br>{{ c.message }}{% endif %}
+        </div>
+        {% empty %}
+        <p class="form-section-hint">No comments yet.</p>
+        {% endfor %}
+    </div>
+
+    {% if can_forward or can_return or can_approve %}
+    <div class="form-section">
+        <h3 class="form-section-title">Actions</h3>
+        <div class="form-grid">
+            {% if can_forward %}
+            <form method="post" class="form-field full">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="forward">
+                <label>Note to the Superadmin (optional)</label>
+                <textarea name="message" rows="2"></textarea>
+                <div class="form-actions"><button type="submit" class="btn-primary">Forward to Superadmin</button></div>
+            </form>
+            {% endif %}
+            {% if can_approve %}
+            <form method="post" class="form-field full">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approve">
+                <label>Note (optional)</label>
+                <textarea name="message" rows="2"></textarea>
+                <div class="form-actions"><button type="submit" class="btn-primary">Approve</button></div>
+            </form>
+            {% endif %}
+            {% if can_return %}
+            <form method="post" class="form-field full">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="return">
+                <label>Reason for declining / changes needed<span class="required-mark">*</span></label>
+                <textarea name="message" rows="3" required></textarea>
+                <div class="help-text">Sends this back to {% if is_finance %}the submitter{% else %}the Finance Admin{% endif %} with your comment, so they can fix it and resubmit.</div>
+                <div class="form-actions"><button type="submit" class="btn-secondary">Decline / Request Changes</button></div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="form-section">
+        <h3 class="form-section-title">Add a Comment</h3>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="comment">
+            <div class="form-grid">
+                <div class="form-field full">
+                    <textarea name="message" rows="2" placeholder="Add a note without changing the status"></textarea>
+                </div>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn-secondary">Add Comment</button></div>
+        </form>
+    </div>
+</div>
+{% endblock %}
