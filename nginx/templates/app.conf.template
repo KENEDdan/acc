@@ -1,0 +1,31 @@
+# Rendered to /etc/nginx/conf.d/app.conf at container startup by the nginx
+# image's built-in envsubst step (see NGINX_ENVSUBST_FILTER in
+# docker-compose.prod.yml) — only ${DOMAIN} is substituted, every other $var
+# below is a real nginx variable, left as-is.
+
+server {
+    listen 80;
+    server_name ${DOMAIN} www.${DOMAIN};
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name ${DOMAIN} www.${DOMAIN};
+
+    ssl_certificate     /etc/nginx/certs/cloudflare-origin.pem;
+    ssl_certificate_key /etc/nginx/certs/cloudflare-origin.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    # Matches the largest upload accepted by the app (library resources, see
+    # church.models.validate_library_file_size), plus a little headroom.
+    client_max_body_size 30M;
+
+    location / {
+        proxy_pass http://web:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
