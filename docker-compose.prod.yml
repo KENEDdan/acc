@@ -104,10 +104,14 @@ services:
     volumes:
       - ./nginx/templates:/etc/nginx/templates:ro
       - ./nginx/certs:/etc/nginx/certs:ro
-    # The base image ships its own default.conf (a "Welcome to nginx" site on
-    # port 80) alongside whatever our template renders — drop it so a direct
-    # IP request (bypassing Cloudflare/the real domain) doesn't serve it.
-    command: sh -c "rm -f /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
+      # The base image ships its own default.conf (a "Welcome to nginx" site
+      # on port 80) alongside whatever our template renders below — shadow it
+      # with an empty file so a direct IP request doesn't serve it. Deliberately
+      # NOT overriding `command:` to rm it instead — the image's own entrypoint
+      # only runs its envsubst-the-templates step (which is what renders
+      # ${DOMAIN} into app.conf.template below) when it receives exactly
+      # `nginx ...` as the command, so left as the image's default CMD here.
+      - /dev/null:/etc/nginx/conf.d/default.conf:ro
 
 volumes:
   acc_pgdata:
