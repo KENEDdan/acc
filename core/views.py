@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView, ListView
 from django.contrib.auth.views import LoginView
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth import get_user_model
@@ -80,6 +80,22 @@ class SearchView(ListView):
 
 class AboutOverviewView(TemplateView):
     template_name = "core/about_overview.html"
+
+
+@require_GET
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Disallow: /dashboard/",
+        "Disallow: /finance/",
+        "Disallow: /account/",
+        "Disallow: /admin/",
+        "Disallow: /notifications/",
+        "Allow: /",
+        "",
+        f"Sitemap: {request.scheme}://{request.get_host()}/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
 
 
 class ContactView(TemplateView):
