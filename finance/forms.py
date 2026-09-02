@@ -31,7 +31,7 @@ class BudgetForm(forms.ModelForm):
         model = Budget
         fields = ('amount', 'currency', 'justification')
         widgets = {
-            'justification': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Why does this activity need this budget?'}),
+            'justification': forms.Textarea(attrs={'rows': 4}),
         }
 
     def __init__(self, *args, scope=None, **kwargs):
