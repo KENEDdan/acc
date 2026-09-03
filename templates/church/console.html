@@ -38,6 +38,11 @@
     <a class="feed-card" href="{% url 'church:pastors_elders' %}">
         <div class="feed-card-body"><span class="feed-type-tag">Structure</span><h3>Pastors &amp; Elders</h3><p>The public leadership directory. Added by the superadmin.</p></div>
     </a>
+    {% if user.is_superadmin %}
+    <a class="feed-card" href="{% url 'dashboard:about_us_edit' 'church' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>About Us</h3><p>Edit the public About Us page.</p></div>
+    </a>
+    {% endif %}
 </div>
 
 <h2 class="dash-subhead">Audit Log</h2>

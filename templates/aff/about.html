@@ -1,6 +1,27 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}About AFF{% endblock %}
 {% block content %}
-<h1>About Apostles' Feet Foundation</h1>
-{% if about %}<div>{{ about.content|linebreaks }}</div>{% else %}<p>Content coming soon.</p>{% endif %}
+<div class="about-hero">
+    <img class="about-hero-logo" src="{% static 'img/acc_logo.png' %}" alt="Apostles' Feet Foundation logo">
+    <div class="about-hero-text">
+        <span class="eyebrow">Apostles' Feet Foundation</span>
+        <h1>About AFF</h1>
+        <p style="color:var(--acc-muted); margin:0;">"Neither was there any among them that lacked..." &mdash; Acts 4:34-35</p>
+    </div>
+</div>
+
+{% if about %}
+<div class="about-article">
+    {% for block in about_blocks %}
+        {% if block.type == 'heading' %}
+        <h3>{{ block.text }}</h3>
+        {% else %}
+        <p>{{ block.text|linebreaksbr }}</p>
+        {% endif %}
+    {% endfor %}
+</div>
+{% else %}
+<p>Content coming soon.</p>
+{% endif %}
 {% endblock %}

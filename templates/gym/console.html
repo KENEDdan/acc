@@ -30,6 +30,11 @@
     <a class="feed-card" href="{% url 'gym:media_dashboard' %}">
         <div class="feed-card-body"><span class="feed-type-tag">Media</span><h3>Activities &amp; Media</h3><p>School activity records.</p></div>
     </a>
+    {% if user.is_superadmin %}
+    <a class="feed-card" href="{% url 'dashboard:about_us_edit' 'gym' %}">
+        <div class="feed-card-body"><span class="feed-type-tag">Manage</span><h3>About Us</h3><p>Edit the public About Us page.</p></div>
+    </a>
+    {% endif %}
 </div>
 
 <h2 class="dash-subhead">Audit Log</h2>

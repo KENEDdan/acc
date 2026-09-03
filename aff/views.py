@@ -10,6 +10,7 @@ from newsfeed.models import FeedItem, FeedItemManager
 from finance.utils import currency_breakdown, period_breakdown, sanitize_csv_row
 from finance.models import Budget
 from audit.models import AuditLog
+from core.utils import parse_about_content
 from audit.services import log_action
 from notifications.services import notify_user, notify_superadmins, notify_role
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -36,7 +37,9 @@ class AffAboutUsView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['about'] = AboutUs.objects.first()
+        about = AboutUs.objects.first()
+        ctx['about'] = about
+        ctx['about_blocks'] = parse_about_content(about.content) if about else []
         return ctx
 
 

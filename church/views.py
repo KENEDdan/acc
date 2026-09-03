@@ -30,6 +30,7 @@ from .id_cards import generate_member_id_card_pdf
 from accounts.services import create_member_account, reset_member_password
 from notifications.services import notify_role, notify_superadmins, notify_user
 from finance.models import Budget
+from core.utils import parse_about_content
 from .models import (
     Activity, Member, DiscipleshipEnrollment, MediaItem,
     LibraryResource, AboutUs, FinanceRecord, Branch, LiveService,
@@ -54,7 +55,9 @@ class AboutUsView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['about'] = AboutUs.objects.first()
+        about = AboutUs.objects.first()
+        ctx['about'] = about
+        ctx['about_blocks'] = parse_about_content(about.content) if about else []
         return ctx
 
 

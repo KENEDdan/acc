@@ -1,9 +1,26 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}About Church (ACC){% endblock %}
 {% block content %}
-<h1>About Apostolic Campus Church</h1>
+<div class="about-hero">
+    <img class="about-hero-logo" src="{% static 'img/acc_logo.png' %}" alt="Apostolic Campus Church logo">
+    <div class="about-hero-text">
+        <span class="eyebrow">Church (ACC)</span>
+        <h1>About Apostolic Campus Church</h1>
+        <p style="color:var(--acc-muted); margin:0;">Grace and Truth.</p>
+    </div>
+</div>
+
 {% if about %}
-<div>{{ about.content|linebreaks }}</div>
+<div class="about-article">
+    {% for block in about_blocks %}
+        {% if block.type == 'heading' %}
+        <h3>{{ block.text }}</h3>
+        {% else %}
+        <p>{{ block.text|linebreaksbr }}</p>
+        {% endif %}
+    {% endfor %}
+</div>
 {% else %}
 <p>Church history and mission content will be added here soon.</p>
 {% endif %}
