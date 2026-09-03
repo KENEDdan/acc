@@ -21,8 +21,18 @@ server {
     # church.models.validate_library_file_size), plus a little headroom.
     client_max_body_size 30M;
 
+    # Docker's embedded DNS (always 127.0.0.11 on a compose-created network).
+    # nginx resolves a bare `proxy_pass http://web:8000` ONCE, at startup, and
+    # caches that IP forever — so a redeploy that recreates the web container
+    # (new IP) leaves nginx silently proxying to whatever container now holds
+    # the OLD IP until nginx itself is restarted (a 502, or worse, a request
+    # reaching the wrong service). Routing proxy_pass through a variable
+    # forces nginx to re-resolve `web` via this resolver on this TTL instead.
+    resolver 127.0.0.11 valid=10s;
+    set $web_upstream http://web:8000;
+
     location / {
-        proxy_pass http://web:8000;
+        proxy_pass $web_upstream;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto https;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
